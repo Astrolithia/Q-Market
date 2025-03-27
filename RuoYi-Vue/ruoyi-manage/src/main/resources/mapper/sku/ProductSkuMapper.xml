@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.manage.mapper.ProductSkuMapper">
+    
+    <resultMap type="ProductSku" id="ProductSkuResult">
+        <result property="id"    column="id"    />
+        <result property="productId"    column="product_id"    />
+        <result property="skuCode"    column="sku_code"    />
+        <result property="specification"    column="specification"    />
+        <result property="price"    column="price"    />
+        <result property="stock"    column="stock"    />
+        <result property="sales"    column="sales"    />
+        <result property="image"    column="image"    />
+        <result property="status"    column="status"    />
+        <result property="createTime"    column="create_time"    />
+        <result property="updateTime"    column="update_time"    />
+    </resultMap>
+
+    <sql id="selectProductSkuVo">
+        select id, product_id, sku_code, specification, price, stock, sales, image, status, create_time, update_time from tb_product_sku
+    </sql>
+
+    <select id="selectProductSkuList" parameterType="ProductSku" resultMap="ProductSkuResult">
+        <include refid="selectProductSkuVo"/>
+        <where>  
+            <if test="productId != null "> and product_id like concat('%', #{productId}, '%')</if>
+            <if test="stock != null "> and stock like concat('%', #{stock}, '%')</if>
+            <if test="sales != null "> and sales like concat('%', #{sales}, '%')</if>
+            <if test="status != null "> and status = #{status}</if>
+        </where>
+    </select>
+    
+    <select id="selectProductSkuById" parameterType="Long" resultMap="ProductSkuResult">
+        <include refid="selectProductSkuVo"/>
+        where id = #{id}
+    </select>
+
+    <insert id="insertProductSku" parameterType="ProductSku" useGeneratedKeys="true" keyProperty="id">
+        insert into tb_product_sku
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="productId != null">product_id,</if>
+            <if test="skuCode != null and skuCode != ''">sku_code,</if>
+            <if test="specification != null">specification,</if>
+            <if test="price != null">price,</if>
+            <if test="stock != null">stock,</if>
+            <if test="sales != null">sales,</if>
+            <if test="image != null">image,</if>
+            <if test="status != null">status,</if>
+            <if test="createTime != null">create_time,</if>
+            <if test="updateTime != null">update_time,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="productId != null">#{productId},</if>
+            <if test="skuCode != null and skuCode != ''">#{skuCode},</if>
+            <if test="specification != null">#{specification},</if>
+            <if test="price != null">#{price},</if>
+            <if test="stock != null">#{stock},</if>
+            <if test="sales != null">#{sales},</if>
+            <if test="image != null">#{image},</if>
+            <if test="status != null">#{status},</if>
+            <if test="createTime != null">#{createTime},</if>
+            <if test="updateTime != null">#{updateTime},</if>
+         </trim>
+    </insert>
+
+    <update id="updateProductSku" parameterType="ProductSku">
+        update tb_product_sku
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="productId != null">product_id = #{productId},</if>
+            <if test="skuCode != null and skuCode != ''">sku_code = #{skuCode},</if>
+            <if test="specification != null">specification = #{specification},</if>
+            <if test="price != null">price = #{price},</if>
+            <if test="stock != null">stock = #{stock},</if>
+            <if test="sales != null">sales = #{sales},</if>
+            <if test="image != null">image = #{image},</if>
+            <if test="status != null">status = #{status},</if>
+            <if test="createTime != null">create_time = #{createTime},</if>
+            <if test="updateTime != null">update_time = #{updateTime},</if>
+        </trim>
+        where id = #{id}
+    </update>
+
+    <delete id="deleteProductSkuById" parameterType="Long">
+        delete from tb_product_sku where id = #{id}
+    </delete>
+
+    <delete id="deleteProductSkuByIds" parameterType="String">
+        delete from tb_product_sku where id in 
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+</mapper>
