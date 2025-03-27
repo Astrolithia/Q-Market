@@ -4,7 +4,11 @@
     <file url="file://$PROJECT_DIR$/RuoYi-Vue/sql/brandMenu.sql" dialect="MySQL" />
     <file url="file://$PROJECT_DIR$/RuoYi-Vue/sql/categoryMenu.sql" dialect="MySQL" />
     <file url="file://$PROJECT_DIR$/RuoYi-Vue/sql/customerMenu.sql" dialect="MySQL" />
+    <file url="file://$PROJECT_DIR$/RuoYi-Vue/sql/itemMenu.sql" dialect="MySQL" />
     <file url="file://$PROJECT_DIR$/RuoYi-Vue/sql/levelMenu.sql" dialect="MySQL" />
+    <file url="file://$PROJECT_DIR$/RuoYi-Vue/sql/logisticsMenu.sql" dialect="MySQL" />
+    <file url="file://$PROJECT_DIR$/RuoYi-Vue/sql/order.sql" dialect="MySQL" />
+    <file url="file://$PROJECT_DIR$/RuoYi-Vue/sql/orderMenu.sql" dialect="MySQL" />
     <file url="file://$PROJECT_DIR$/RuoYi-Vue/sql/productMenu.sql" dialect="MySQL" />
     <file url="file://$PROJECT_DIR$/RuoYi-Vue/sql/quartz.sql" dialect="MySQL" />
     <file url="file://$PROJECT_DIR$/RuoYi-Vue/sql/ry_20240629.sql" dialect="MySQL" />

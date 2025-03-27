@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.manage.mapper.OrderLogisticsMapper">
+    
+    <resultMap type="OrderLogistics" id="OrderLogisticsResult">
+        <result property="id"    column="id"    />
+        <result property="orderId"    column="order_id"    />
+        <result property="orderNo"    column="order_no"    />
+        <result property="shippingMethod"    column="shipping_method"    />
+        <result property="logisticsCompany"    column="logistics_company"    />
+        <result property="logisticsNo"    column="logistics_no"    />
+        <result property="shippingTime"    column="shipping_time"    />
+        <result property="deliveryTime"    column="delivery_time"    />
+        <result property="logisticsStatus"    column="logistics_status"    />
+        <result property="logisticsInfo"    column="logistics_info"    />
+        <result property="createTime"    column="create_time"    />
+        <result property="updateTime"    column="update_time"    />
+    </resultMap>
+
+    <sql id="selectOrderLogisticsVo">
+        select id, order_id, order_no, shipping_method, logistics_company, logistics_no, shipping_time, delivery_time, logistics_status, logistics_info, create_time, update_time from tb_order_logistics
+    </sql>
+
+    <select id="selectOrderLogisticsList" parameterType="OrderLogistics" resultMap="OrderLogisticsResult">
+        <include refid="selectOrderLogisticsVo"/>
+        <where>  
+            <if test="shippingMethod != null  and shippingMethod != ''"> and shipping_method = #{shippingMethod}</if>
+            <if test="logisticsCompany != null  and logisticsCompany != ''"> and logistics_company = #{logisticsCompany}</if>
+            <if test="logisticsStatus != null "> and logistics_status = #{logisticsStatus}</if>
+        </where>
+    </select>
+    
+    <select id="selectOrderLogisticsById" parameterType="Long" resultMap="OrderLogisticsResult">
+        <include refid="selectOrderLogisticsVo"/>
+        where id = #{id}
+    </select>
+
+    <insert id="insertOrderLogistics" parameterType="OrderLogistics" useGeneratedKeys="true" keyProperty="id">
+        insert into tb_order_logistics
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="orderId != null">order_id,</if>
+            <if test="orderNo != null and orderNo != ''">order_no,</if>
+            <if test="shippingMethod != null">shipping_method,</if>
+            <if test="logisticsCompany != null">logistics_company,</if>
+            <if test="logisticsNo != null">logistics_no,</if>
+            <if test="shippingTime != null">shipping_time,</if>
+            <if test="deliveryTime != null">delivery_time,</if>
+            <if test="logisticsStatus != null">logistics_status,</if>
+            <if test="logisticsInfo != null">logistics_info,</if>
+            <if test="createTime != null">create_time,</if>
+            <if test="updateTime != null">update_time,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="orderId != null">#{orderId},</if>
+            <if test="orderNo != null and orderNo != ''">#{orderNo},</if>
+            <if test="shippingMethod != null">#{shippingMethod},</if>
+            <if test="logisticsCompany != null">#{logisticsCompany},</if>
+            <if test="logisticsNo != null">#{logisticsNo},</if>
+            <if test="shippingTime != null">#{shippingTime},</if>
+            <if test="deliveryTime != null">#{deliveryTime},</if>
+            <if test="logisticsStatus != null">#{logisticsStatus},</if>
+            <if test="logisticsInfo != null">#{logisticsInfo},</if>
+            <if test="createTime != null">#{createTime},</if>
+            <if test="updateTime != null">#{updateTime},</if>
+         </trim>
+    </insert>
+
+    <update id="updateOrderLogistics" parameterType="OrderLogistics">
+        update tb_order_logistics
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="orderId != null">order_id = #{orderId},</if>
+            <if test="orderNo != null and orderNo != ''">order_no = #{orderNo},</if>
+            <if test="shippingMethod != null">shipping_method = #{shippingMethod},</if>
+            <if test="logisticsCompany != null">logistics_company = #{logisticsCompany},</if>
+            <if test="logisticsNo != null">logistics_no = #{logisticsNo},</if>
+            <if test="shippingTime != null">shipping_time = #{shippingTime},</if>
+            <if test="deliveryTime != null">delivery_time = #{deliveryTime},</if>
+            <if test="logisticsStatus != null">logistics_status = #{logisticsStatus},</if>
+            <if test="logisticsInfo != null">logistics_info = #{logisticsInfo},</if>
+            <if test="createTime != null">create_time = #{createTime},</if>
+            <if test="updateTime != null">update_time = #{updateTime},</if>
+        </trim>
+        where id = #{id}
+    </update>
+
+    <delete id="deleteOrderLogisticsById" parameterType="Long">
+        delete from tb_order_logistics where id = #{id}
+    </delete>
+
+    <delete id="deleteOrderLogisticsByIds" parameterType="String">
+        delete from tb_order_logistics where id in 
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+</mapper>

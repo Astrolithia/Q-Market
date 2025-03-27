@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.manage.mapper.OrderItemMapper">
+    
+    <resultMap type="OrderItem" id="OrderItemResult">
+        <result property="id"    column="id"    />
+        <result property="orderId"    column="order_id"    />
+        <result property="orderNo"    column="order_no"    />
+        <result property="productId"    column="product_id"    />
+        <result property="skuId"    column="sku_id"    />
+        <result property="productName"    column="product_name"    />
+        <result property="skuSpec"    column="sku_spec"    />
+        <result property="productImage"    column="product_image"    />
+        <result property="price"    column="price"    />
+        <result property="actualPrice"    column="actual_price"    />
+        <result property="quantity"    column="quantity"    />
+        <result property="totalAmount"    column="total_amount"    />
+        <result property="createTime"    column="create_time"    />
+    </resultMap>
+
+    <sql id="selectOrderItemVo">
+        select id, order_id, order_no, product_id, sku_id, product_name, sku_spec, product_image, price, actual_price, quantity, total_amount, create_time from tb_order_item
+    </sql>
+
+    <select id="selectOrderItemList" parameterType="OrderItem" resultMap="OrderItemResult">
+        <include refid="selectOrderItemVo"/>
+        <where>  
+            <if test="orderNo != null  and orderNo != ''"> and order_no like concat('%', #{orderNo}, '%')</if>
+            <if test="productName != null  and productName != ''"> and product_name like concat('%', #{productName}, '%')</if>
+        </where>
+    </select>
+    
+    <select id="selectOrderItemById" parameterType="Long" resultMap="OrderItemResult">
+        <include refid="selectOrderItemVo"/>
+        where id = #{id}
+    </select>
+
+    <insert id="insertOrderItem" parameterType="OrderItem" useGeneratedKeys="true" keyProperty="id">
+        insert into tb_order_item
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="orderId != null">order_id,</if>
+            <if test="orderNo != null and orderNo != ''">order_no,</if>
+            <if test="productId != null">product_id,</if>
+            <if test="skuId != null">sku_id,</if>
+            <if test="productName != null and productName != ''">product_name,</if>
+            <if test="skuSpec != null">sku_spec,</if>
+            <if test="productImage != null">product_image,</if>
+            <if test="price != null">price,</if>
+            <if test="actualPrice != null">actual_price,</if>
+            <if test="quantity != null">quantity,</if>
+            <if test="totalAmount != null">total_amount,</if>
+            <if test="createTime != null">create_time,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="orderId != null">#{orderId},</if>
+            <if test="orderNo != null and orderNo != ''">#{orderNo},</if>
+            <if test="productId != null">#{productId},</if>
+            <if test="skuId != null">#{skuId},</if>
+            <if test="productName != null and productName != ''">#{productName},</if>
+            <if test="skuSpec != null">#{skuSpec},</if>
+            <if test="productImage != null">#{productImage},</if>
+            <if test="price != null">#{price},</if>
+            <if test="actualPrice != null">#{actualPrice},</if>
+            <if test="quantity != null">#{quantity},</if>
+            <if test="totalAmount != null">#{totalAmount},</if>
+            <if test="createTime != null">#{createTime},</if>
+         </trim>
+    </insert>
+
+    <update id="updateOrderItem" parameterType="OrderItem">
+        update tb_order_item
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="orderId != null">order_id = #{orderId},</if>
+            <if test="orderNo != null and orderNo != ''">order_no = #{orderNo},</if>
+            <if test="productId != null">product_id = #{productId},</if>
+            <if test="skuId != null">sku_id = #{skuId},</if>
+            <if test="productName != null and productName != ''">product_name = #{productName},</if>
+            <if test="skuSpec != null">sku_spec = #{skuSpec},</if>
+            <if test="productImage != null">product_image = #{productImage},</if>
+            <if test="price != null">price = #{price},</if>
+            <if test="actualPrice != null">actual_price = #{actualPrice},</if>
+            <if test="quantity != null">quantity = #{quantity},</if>
+            <if test="totalAmount != null">total_amount = #{totalAmount},</if>
+            <if test="createTime != null">create_time = #{createTime},</if>
+        </trim>
+        where id = #{id}
+    </update>
+
+    <delete id="deleteOrderItemById" parameterType="Long">
+        delete from tb_order_item where id = #{id}
+    </delete>
+
+    <delete id="deleteOrderItemByIds" parameterType="String">
+        delete from tb_order_item where id in 
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+</mapper>
