@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.manage.mapper.PromotionProductMapper">
+    
+    <resultMap type="PromotionProduct" id="PromotionProductResult">
+        <result property="id"    column="id"    />
+        <result property="promotionId"    column="promotion_id"    />
+        <result property="productId"    column="product_id"    />
+        <result property="skuId"    column="sku_id"    />
+        <result property="promotionPrice"    column="promotion_price"    />
+        <result property="stockLimit"    column="stock_limit"    />
+        <result property="createTime"    column="create_time"    />
+    </resultMap>
+
+    <sql id="selectPromotionProductVo">
+        select id, promotion_id, product_id, sku_id, promotion_price, stock_limit, create_time from tb_promotion_product
+    </sql>
+
+    <select id="selectPromotionProductList" parameterType="PromotionProduct" resultMap="PromotionProductResult">
+        <include refid="selectPromotionProductVo"/>
+        <where>  
+        </where>
+    </select>
+    
+    <select id="selectPromotionProductById" parameterType="Long" resultMap="PromotionProductResult">
+        <include refid="selectPromotionProductVo"/>
+        where id = #{id}
+    </select>
+
+    <insert id="insertPromotionProduct" parameterType="PromotionProduct" useGeneratedKeys="true" keyProperty="id">
+        insert into tb_promotion_product
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="promotionId != null">promotion_id,</if>
+            <if test="productId != null">product_id,</if>
+            <if test="skuId != null">sku_id,</if>
+            <if test="promotionPrice != null">promotion_price,</if>
+            <if test="stockLimit != null">stock_limit,</if>
+            <if test="createTime != null">create_time,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="promotionId != null">#{promotionId},</if>
+            <if test="productId != null">#{productId},</if>
+            <if test="skuId != null">#{skuId},</if>
+            <if test="promotionPrice != null">#{promotionPrice},</if>
+            <if test="stockLimit != null">#{stockLimit},</if>
+            <if test="createTime != null">#{createTime},</if>
+         </trim>
+    </insert>
+
+    <update id="updatePromotionProduct" parameterType="PromotionProduct">
+        update tb_promotion_product
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="promotionId != null">promotion_id = #{promotionId},</if>
+            <if test="productId != null">product_id = #{productId},</if>
+            <if test="skuId != null">sku_id = #{skuId},</if>
+            <if test="promotionPrice != null">promotion_price = #{promotionPrice},</if>
+            <if test="stockLimit != null">stock_limit = #{stockLimit},</if>
+            <if test="createTime != null">create_time = #{createTime},</if>
+        </trim>
+        where id = #{id}
+    </update>
+
+    <delete id="deletePromotionProductById" parameterType="Long">
+        delete from tb_promotion_product where id = #{id}
+    </delete>
+
+    <delete id="deletePromotionProductByIds" parameterType="String">
+        delete from tb_promotion_product where id in 
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+</mapper>
