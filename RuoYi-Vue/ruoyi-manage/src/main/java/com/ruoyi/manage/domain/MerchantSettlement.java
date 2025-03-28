@@ -12,13 +12,14 @@ import com.ruoyi.common.core.domain.BaseEntity;
  * 商家结算管理对象 tb_merchant_settlement
  * 
  * @author shiro
- * @date 2025-03-27
+ * @date 2025-03-28
  */
 public class MerchantSettlement extends BaseEntity
 {
     private static final long serialVersionUID = 1L;
 
     /** 结算ID */
+    @Excel(name = "结算ID")
     private Long id;
 
     /** 商家ID */

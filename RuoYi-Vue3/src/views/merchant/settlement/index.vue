@@ -1,6 +1,14 @@
 <template>
   <div class="app-container">
     <el-form :model="queryParams" ref="queryRef" :inline="true" v-show="showSearch" label-width="68px">
+      <el-form-item label="商家ID" prop="merchantId">
+        <el-input
+          v-model="queryParams.merchantId"
+          placeholder="请输入商家ID"
+          clearable
+          @keyup.enter="handleQuery"
+        />
+      </el-form-item>
       <el-form-item label="结算单号" prop="settlementNo">
         <el-input
           v-model="queryParams.settlementNo"
@@ -8,30 +16,6 @@
           clearable
           @keyup.enter="handleQuery"
         />
-      </el-form-item>
-      <el-form-item label="结算开始日期" prop="settlementStart">
-        <el-date-picker clearable
-          v-model="queryParams.settlementStart"
-          type="date"
-          value-format="YYYY-MM-DD"
-          placeholder="请选择结算开始日期">
-        </el-date-picker>
-      </el-form-item>
-      <el-form-item label="结算结束日期" prop="settlementEnd">
-        <el-date-picker clearable
-          v-model="queryParams.settlementEnd"
-          type="date"
-          value-format="YYYY-MM-DD"
-          placeholder="请选择结算结束日期">
-        </el-date-picker>
-      </el-form-item>
-      <el-form-item label="结算时间" prop="settlementTime">
-        <el-date-picker clearable
-          v-model="queryParams.settlementTime"
-          type="date"
-          value-format="YYYY-MM-DD"
-          placeholder="请选择结算时间">
-        </el-date-picker>
       </el-form-item>
       <el-form-item>
         <el-button type="primary" icon="Search" @click="handleQuery">搜索</el-button>
@@ -106,7 +90,6 @@
           <span>{{ parseTime(scope.row.settlementTime, '{y}-{m}-{d}') }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="备注" align="center" prop="remark" />
       <el-table-column label="操作" align="center" class-name="small-padding fixed-width">
         <template #default="scope">
           <el-button link type="primary" icon="Edit" @click="handleUpdate(scope.row)" v-hasPermi="['merchant:settlement:edit']">修改</el-button>
@@ -168,9 +151,6 @@
             placeholder="请选择结算时间">
           </el-date-picker>
         </el-form-item>
-        <el-form-item label="备注" prop="remark">
-          <el-input v-model="form.remark" type="textarea" placeholder="请输入内容" />
-        </el-form-item>
       </el-form>
       <template #footer>
         <div class="dialog-footer">
@@ -202,11 +182,9 @@ const data = reactive({
   queryParams: {
     pageNum: 1,
     pageSize: 10,
+    merchantId: null,
     settlementNo: null,
-    settlementStart: null,
-    settlementEnd: null,
     status: null,
-    settlementTime: null,
   },
   rules: {
     merchantId: [

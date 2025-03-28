@@ -7,7 +7,7 @@ import com.ruoyi.manage.domain.MerchantSettlement;
  * 商家结算管理Service接口
  * 
  * @author shiro
- * @date 2025-03-27
+ * @date 2025-03-28
  */
 public interface IMerchantSettlementService 
 {

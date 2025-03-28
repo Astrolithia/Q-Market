@@ -1,0 +1,154 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.manage.mapper.MerchantAuditMapper">
+    
+    <resultMap type="MerchantAudit" id="MerchantAuditResult">
+        <result property="id"    column="id"    />
+        <result property="name"    column="name"    />
+        <result property="code"    column="code"    />
+        <result property="contactPerson"    column="contact_person"    />
+        <result property="contactPhone"    column="contact_phone"    />
+        <result property="email"    column="email"    />
+        <result property="address"    column="address"    />
+        <result property="businessLicense"    column="business_license"    />
+        <result property="licenseNumber"    column="license_number"    />
+        <result property="legalRepresentative"    column="legal_representative"    />
+        <result property="category"    column="category"    />
+        <result property="profitRatio"    column="profit_ratio"    />
+        <result property="account"    column="account"    />
+        <result property="password"    column="password"    />
+        <result property="status"    column="status"    />
+        <result property="level"    column="level"    />
+        <result property="score"    column="score"    />
+        <result property="createTime"    column="create_time"    />
+        <result property="applyTime"    column="apply_time"    />
+        <result property="auditTime"    column="audit_time"    />
+        <result property="auditor"    column="auditor"    />
+        <result property="auditStatus"    column="audit_status"    />
+        <result property="rejectReason"    column="reject_reason"    />
+        <result property="updateTime"    column="update_time"    />
+        <result property="createBy"    column="create_by"    />
+        <result property="updateBy"    column="update_by"    />
+    </resultMap>
+
+    <sql id="selectMerchantAuditVo">
+        select id, name, code, contact_person, contact_phone, email, address, business_license, license_number, legal_representative, category, profit_ratio, account, password, status, level, score, create_time, apply_time, audit_time, auditor, audit_status, reject_reason, update_time, create_by, update_by from tb_merchant
+    </sql>
+
+    <select id="selectMerchantAuditList" parameterType="MerchantAudit" resultMap="MerchantAuditResult">
+        <include refid="selectMerchantAuditVo"/>
+        <where>  
+            <if test="name != null  and name != ''"> and name like concat('%', #{name}, '%')</if>
+            <if test="contactPerson != null  and contactPerson != ''"> and contact_person like concat('%', #{contactPerson}, '%')</if>
+            <if test="applyTime != null "> and apply_time = #{applyTime}</if>
+        </where>
+    </select>
+    
+    <select id="selectMerchantAuditById" parameterType="Long" resultMap="MerchantAuditResult">
+        <include refid="selectMerchantAuditVo"/>
+        where id = #{id}
+    </select>
+
+    <insert id="insertMerchantAudit" parameterType="MerchantAudit" useGeneratedKeys="true" keyProperty="id">
+        insert into tb_merchant
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="name != null and name != ''">name,</if>
+            <if test="code != null">code,</if>
+            <if test="contactPerson != null">contact_person,</if>
+            <if test="contactPhone != null">contact_phone,</if>
+            <if test="email != null">email,</if>
+            <if test="address != null">address,</if>
+            <if test="businessLicense != null">business_license,</if>
+            <if test="licenseNumber != null">license_number,</if>
+            <if test="legalRepresentative != null">legal_representative,</if>
+            <if test="category != null">category,</if>
+            <if test="profitRatio != null">profit_ratio,</if>
+            <if test="account != null">account,</if>
+            <if test="password != null">password,</if>
+            <if test="status != null">status,</if>
+            <if test="level != null">level,</if>
+            <if test="score != null">score,</if>
+            <if test="createTime != null">create_time,</if>
+            <if test="applyTime != null">apply_time,</if>
+            <if test="auditTime != null">audit_time,</if>
+            <if test="auditor != null">auditor,</if>
+            <if test="auditStatus != null">audit_status,</if>
+            <if test="rejectReason != null">reject_reason,</if>
+            <if test="updateTime != null">update_time,</if>
+            <if test="createBy != null">create_by,</if>
+            <if test="updateBy != null">update_by,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="name != null and name != ''">#{name},</if>
+            <if test="code != null">#{code},</if>
+            <if test="contactPerson != null">#{contactPerson},</if>
+            <if test="contactPhone != null">#{contactPhone},</if>
+            <if test="email != null">#{email},</if>
+            <if test="address != null">#{address},</if>
+            <if test="businessLicense != null">#{businessLicense},</if>
+            <if test="licenseNumber != null">#{licenseNumber},</if>
+            <if test="legalRepresentative != null">#{legalRepresentative},</if>
+            <if test="category != null">#{category},</if>
+            <if test="profitRatio != null">#{profitRatio},</if>
+            <if test="account != null">#{account},</if>
+            <if test="password != null">#{password},</if>
+            <if test="status != null">#{status},</if>
+            <if test="level != null">#{level},</if>
+            <if test="score != null">#{score},</if>
+            <if test="createTime != null">#{createTime},</if>
+            <if test="applyTime != null">#{applyTime},</if>
+            <if test="auditTime != null">#{auditTime},</if>
+            <if test="auditor != null">#{auditor},</if>
+            <if test="auditStatus != null">#{auditStatus},</if>
+            <if test="rejectReason != null">#{rejectReason},</if>
+            <if test="updateTime != null">#{updateTime},</if>
+            <if test="createBy != null">#{createBy},</if>
+            <if test="updateBy != null">#{updateBy},</if>
+         </trim>
+    </insert>
+
+    <update id="updateMerchantAudit" parameterType="MerchantAudit">
+        update tb_merchant
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="name != null and name != ''">name = #{name},</if>
+            <if test="code != null">code = #{code},</if>
+            <if test="contactPerson != null">contact_person = #{contactPerson},</if>
+            <if test="contactPhone != null">contact_phone = #{contactPhone},</if>
+            <if test="email != null">email = #{email},</if>
+            <if test="address != null">address = #{address},</if>
+            <if test="businessLicense != null">business_license = #{businessLicense},</if>
+            <if test="licenseNumber != null">license_number = #{licenseNumber},</if>
+            <if test="legalRepresentative != null">legal_representative = #{legalRepresentative},</if>
+            <if test="category != null">category = #{category},</if>
+            <if test="profitRatio != null">profit_ratio = #{profitRatio},</if>
+            <if test="account != null">account = #{account},</if>
+            <if test="password != null">password = #{password},</if>
+            <if test="status != null">status = #{status},</if>
+            <if test="level != null">level = #{level},</if>
+            <if test="score != null">score = #{score},</if>
+            <if test="createTime != null">create_time = #{createTime},</if>
+            <if test="applyTime != null">apply_time = #{applyTime},</if>
+            <if test="auditTime != null">audit_time = #{auditTime},</if>
+            <if test="auditor != null">auditor = #{auditor},</if>
+            <if test="auditStatus != null">audit_status = #{auditStatus},</if>
+            <if test="rejectReason != null">reject_reason = #{rejectReason},</if>
+            <if test="updateTime != null">update_time = #{updateTime},</if>
+            <if test="createBy != null">create_by = #{createBy},</if>
+            <if test="updateBy != null">update_by = #{updateBy},</if>
+        </trim>
+        where id = #{id}
+    </update>
+
+    <delete id="deleteMerchantAuditById" parameterType="Long">
+        delete from tb_merchant where id = #{id}
+    </delete>
+
+    <delete id="deleteMerchantAuditByIds" parameterType="String">
+        delete from tb_merchant where id in 
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+</mapper>

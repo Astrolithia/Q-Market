@@ -28,11 +28,9 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
     <select id="selectMerchantSettlementList" parameterType="MerchantSettlement" resultMap="MerchantSettlementResult">
         <include refid="selectMerchantSettlementVo"/>
         <where>  
+            <if test="merchantId != null "> and merchant_id = #{merchantId}</if>
             <if test="settlementNo != null  and settlementNo != ''"> and settlement_no like concat('%', #{settlementNo}, '%')</if>
-            <if test="settlementStart != null "> and settlement_start = #{settlementStart}</if>
-            <if test="settlementEnd != null "> and settlement_end = #{settlementEnd}</if>
             <if test="status != null "> and status = #{status}</if>
-            <if test="settlementTime != null "> and settlement_time = #{settlementTime}</if>
         </where>
     </select>
     

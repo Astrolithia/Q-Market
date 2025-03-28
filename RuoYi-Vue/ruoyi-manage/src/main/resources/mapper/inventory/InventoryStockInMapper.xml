@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.manage.mapper.InventoryStockInMapper">
+    
+    <resultMap type="InventoryStockIn" id="InventoryStockInResult">
+        <result property="id"    column="id"    />
+        <result property="inNo"    column="in_no"    />
+        <result property="warehouseId"    column="warehouse_id"    />
+        <result property="merchantId"    column="merchant_id"    />
+        <result property="inType"    column="in_type"    />
+        <result property="status"    column="status"    />
+        <result property="totalQuantity"    column="total_quantity"    />
+        <result property="totalAmount"    column="total_amount"    />
+        <result property="operator"    column="operator"    />
+        <result property="operatorId"    column="operator_id"    />
+        <result property="auditTime"    column="audit_time"    />
+        <result property="auditor"    column="auditor"    />
+        <result property="remark"    column="remark"    />
+        <result property="createTime"    column="create_time"    />
+        <result property="updateTime"    column="update_time"    />
+    </resultMap>
+
+    <sql id="selectInventoryStockInVo">
+        select id, in_no, warehouse_id, merchant_id, in_type, status, total_quantity, total_amount, operator, operator_id, audit_time, auditor, remark, create_time, update_time from tb_stock_in
+    </sql>
+
+    <select id="selectInventoryStockInList" parameterType="InventoryStockIn" resultMap="InventoryStockInResult">
+        <include refid="selectInventoryStockInVo"/>
+        <where>  
+            <if test="inNo != null  and inNo != ''"> and in_no like concat('%', #{inNo}, '%')</if>
+            <if test="inType != null "> and in_type = #{inType}</if>
+            <if test="status != null "> and status = #{status}</if>
+            <if test="operator != null  and operator != ''"> and operator like concat('%', #{operator}, '%')</if>
+        </where>
+    </select>
+    
+    <select id="selectInventoryStockInById" parameterType="Long" resultMap="InventoryStockInResult">
+        <include refid="selectInventoryStockInVo"/>
+        where id = #{id}
+    </select>
+
+    <insert id="insertInventoryStockIn" parameterType="InventoryStockIn" useGeneratedKeys="true" keyProperty="id">
+        insert into tb_stock_in
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="inNo != null and inNo != ''">in_no,</if>
+            <if test="warehouseId != null">warehouse_id,</if>
+            <if test="merchantId != null">merchant_id,</if>
+            <if test="inType != null">in_type,</if>
+            <if test="status != null">status,</if>
+            <if test="totalQuantity != null">total_quantity,</if>
+            <if test="totalAmount != null">total_amount,</if>
+            <if test="operator != null">operator,</if>
+            <if test="operatorId != null">operator_id,</if>
+            <if test="auditTime != null">audit_time,</if>
+            <if test="auditor != null">auditor,</if>
+            <if test="remark != null">remark,</if>
+            <if test="createTime != null">create_time,</if>
+            <if test="updateTime != null">update_time,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="inNo != null and inNo != ''">#{inNo},</if>
+            <if test="warehouseId != null">#{warehouseId},</if>
+            <if test="merchantId != null">#{merchantId},</if>
+            <if test="inType != null">#{inType},</if>
+            <if test="status != null">#{status},</if>
+            <if test="totalQuantity != null">#{totalQuantity},</if>
+            <if test="totalAmount != null">#{totalAmount},</if>
+            <if test="operator != null">#{operator},</if>
+            <if test="operatorId != null">#{operatorId},</if>
+            <if test="auditTime != null">#{auditTime},</if>
+            <if test="auditor != null">#{auditor},</if>
+            <if test="remark != null">#{remark},</if>
+            <if test="createTime != null">#{createTime},</if>
+            <if test="updateTime != null">#{updateTime},</if>
+         </trim>
+    </insert>
+
+    <update id="updateInventoryStockIn" parameterType="InventoryStockIn">
+        update tb_stock_in
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="inNo != null and inNo != ''">in_no = #{inNo},</if>
+            <if test="warehouseId != null">warehouse_id = #{warehouseId},</if>
+            <if test="merchantId != null">merchant_id = #{merchantId},</if>
+            <if test="inType != null">in_type = #{inType},</if>
+            <if test="status != null">status = #{status},</if>
+            <if test="totalQuantity != null">total_quantity = #{totalQuantity},</if>
+            <if test="totalAmount != null">total_amount = #{totalAmount},</if>
+            <if test="operator != null">operator = #{operator},</if>
+            <if test="operatorId != null">operator_id = #{operatorId},</if>
+            <if test="auditTime != null">audit_time = #{auditTime},</if>
+            <if test="auditor != null">auditor = #{auditor},</if>
+            <if test="remark != null">remark = #{remark},</if>
+            <if test="createTime != null">create_time = #{createTime},</if>
+            <if test="updateTime != null">update_time = #{updateTime},</if>
+        </trim>
+        where id = #{id}
+    </update>
+
+    <delete id="deleteInventoryStockInById" parameterType="Long">
+        delete from tb_stock_in where id = #{id}
+    </delete>
+
+    <delete id="deleteInventoryStockInByIds" parameterType="String">
+        delete from tb_stock_in where id in 
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+</mapper>

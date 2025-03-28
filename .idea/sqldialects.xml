@@ -1,10 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="SqlDialectMappings">
+    <file url="file://$PROJECT_DIR$/RuoYi-Vue/sql/auditMenu.sql" dialect="MySQL" />
     <file url="file://$PROJECT_DIR$/RuoYi-Vue/sql/brandMenu.sql" dialect="MySQL" />
     <file url="file://$PROJECT_DIR$/RuoYi-Vue/sql/categoryMenu.sql" dialect="MySQL" />
     <file url="file://$PROJECT_DIR$/RuoYi-Vue/sql/couponMenu.sql" dialect="MySQL" />
     <file url="file://$PROJECT_DIR$/RuoYi-Vue/sql/customerMenu.sql" dialect="MySQL" />
+    <file url="file://$PROJECT_DIR$/RuoYi-Vue/sql/inventory.sql" dialect="MySQL" />
+    <file url="file://$PROJECT_DIR$/RuoYi-Vue/sql/inventoryMenu.sql" dialect="MySQL" />
     <file url="file://$PROJECT_DIR$/RuoYi-Vue/sql/itemMenu.sql" dialect="MySQL" />
     <file url="file://$PROJECT_DIR$/RuoYi-Vue/sql/levelMenu.sql" dialect="MySQL" />
     <file url="file://$PROJECT_DIR$/RuoYi-Vue/sql/logisticsMenu.sql" dialect="MySQL" />
@@ -19,5 +22,7 @@
     <file url="file://$PROJECT_DIR$/RuoYi-Vue/sql/scoreMenu.sql" dialect="MySQL" />
     <file url="file://$PROJECT_DIR$/RuoYi-Vue/sql/settlementMenu.sql" dialect="MySQL" />
     <file url="file://$PROJECT_DIR$/RuoYi-Vue/sql/skuMenu.sql" dialect="MySQL" />
+    <file url="file://$PROJECT_DIR$/RuoYi-Vue/sql/stock_out.sql" dialect="MySQL" />
+    <file url="file://$PROJECT_DIR$/RuoYi-Vue/sql/stockinMenu.sql" dialect="MySQL" />
   </component>
 </project>
