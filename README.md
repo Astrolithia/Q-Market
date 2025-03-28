@@ -366,6 +366,14 @@ CREATE TABLE `tb_merchant` (
   `status` TINYINT DEFAULT 1 COMMENT '状态：0禁用，1启用',
   `level` INT DEFAULT 1 COMMENT '商家等级',
   `score` INT DEFAULT 100 COMMENT '评分',
+  `delivery_rate` DECIMAL(5,2) DEFAULT 0.00 COMMENT '交付率(%)',
+  `on_time_rate` DECIMAL(5,2) DEFAULT 0.00 COMMENT '准时率(%)',
+  `completion_rate` DECIMAL(5,2) DEFAULT 0.00 COMMENT '订单完成率(%)',
+  `service_score` DECIMAL(3,2) DEFAULT 5.00 COMMENT '服务评分(1-5分)',
+  `logistics_score` DECIMAL(3,2) DEFAULT 5.00 COMMENT '物流评分(1-5分)',
+  `product_score` DECIMAL(3,2) DEFAULT 5.00 COMMENT '商品评分(1-5分)',
+  `rating_count` INT DEFAULT 0 COMMENT '评价总数',
+  `level_update_time` DATETIME COMMENT '等级更新时间',
   `create_time` DATETIME DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
   `update_time` DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
   `create_by` VARCHAR(64) COMMENT '创建人',
@@ -395,6 +403,172 @@ CREATE TABLE `tb_merchant_settlement` (
   KEY `idx_merchant_id` (`merchant_id`),
   KEY `idx_settlement_time` (`settlement_time`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='商家结算表';
+
+-- 商家等级表
+CREATE TABLE `tb_merchant_level` (
+  `id` INT AUTO_INCREMENT COMMENT '等级ID',
+  `level_name` VARCHAR(50) NOT NULL COMMENT '等级名称',
+  `level_stars` INT DEFAULT 1 COMMENT '等级星数(1-5)',
+  `min_score` INT NOT NULL COMMENT '最低分数要求',
+  `max_score` INT NOT NULL COMMENT '最高分数',
+  `min_delivery_rate` DECIMAL(5,2) DEFAULT 0.00 COMMENT '最低交付率要求(%)',
+  `min_on_time_rate` DECIMAL(5,2) DEFAULT 0.00 COMMENT '最低准时率要求(%)', 
+  `min_completion_rate` DECIMAL(5,2) DEFAULT 0.00 COMMENT '最低完成率要求(%)',
+  `commission_rate` DECIMAL(5,2) DEFAULT 0 COMMENT '佣金比例(%)',
+  `priority` INT DEFAULT 0 COMMENT '服务优先级',
+  `benefits` VARCHAR(500) COMMENT '等级权益',
+  `icon` VARCHAR(255) COMMENT '等级图标',
+  `remark` VARCHAR(500) COMMENT '备注',
+  `create_time` DATETIME DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+  `update_time` DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+  `create_by` VARCHAR(64) COMMENT '创建人',
+  `update_by` VARCHAR(64) COMMENT '更新人',
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='商家等级表';
+
+-- 商家评级历史表
+CREATE TABLE `tb_merchant_rating_history` (
+  `id` BIGINT AUTO_INCREMENT COMMENT '记录ID',
+  `merchant_id` BIGINT NOT NULL COMMENT '商家ID',
+  `previous_level` INT COMMENT '之前等级',
+  `current_level` INT COMMENT '当前等级',
+  `previous_score` INT COMMENT '之前评分',
+  `current_score` INT COMMENT '当前评分',
+  `change_reason` VARCHAR(255) COMMENT '变更原因',
+  `remark` VARCHAR(500) COMMENT '备注',
+  `create_time` DATETIME DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+  `update_time` DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+  `create_by` VARCHAR(64) COMMENT '创建人',
+  `update_by` VARCHAR(64) COMMENT '更新人',
+  PRIMARY KEY (`id`),
+  KEY `idx_merchant_id` (`merchant_id`),
+  CONSTRAINT `fk_rating_history_merchant` FOREIGN KEY (`merchant_id`) REFERENCES `tb_merchant` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='商家评级历史表';
+
+-- 商家评价指标表
+CREATE TABLE `tb_merchant_rating_metrics` (
+  `id` BIGINT AUTO_INCREMENT COMMENT '指标ID',
+  `merchant_id` BIGINT NOT NULL COMMENT '商家ID',
+  `metric_date` DATE NOT NULL COMMENT '统计日期',
+  `order_count` INT DEFAULT 0 COMMENT '订单数',
+  `completed_count` INT DEFAULT 0 COMMENT '完成订单数',
+  `on_time_count` INT DEFAULT 0 COMMENT '准时订单数',
+  `delayed_count` INT DEFAULT 0 COMMENT '延迟订单数',
+  `cancelled_count` INT DEFAULT 0 COMMENT '取消订单数',
+  `delivery_rate` DECIMAL(5,2) DEFAULT 0.00 COMMENT '交付率(%)',
+  `on_time_rate` DECIMAL(5,2) DEFAULT 0.00 COMMENT '准时率(%)',
+  `completion_rate` DECIMAL(5,2) DEFAULT 0.00 COMMENT '完成率(%)',
+  `average_rating` DECIMAL(3,2) DEFAULT 5.00 COMMENT '平均评分',
+  `avg_shipping_time` INT DEFAULT 0 COMMENT '平均发货时间(小时)',
+  `create_time` DATETIME DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+  `update_time` DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `uk_merchant_date` (`merchant_id`, `metric_date`),
+  KEY `idx_merchant_id` (`merchant_id`),
+  KEY `idx_metric_date` (`metric_date`),
+  CONSTRAINT `fk_metrics_merchant` FOREIGN KEY (`merchant_id`) REFERENCES `tb_merchant` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='商家评价指标表';
+
+-- 测试数据：更新商家表中的评级相关字段
+UPDATE `tb_merchant` SET 
+    `delivery_rate` = 98.50,
+    `on_time_rate` = 96.30,
+    `completion_rate` = 97.80,
+    `service_score` = 4.70,
+    `logistics_score` = 4.50,
+    `product_score` = 4.80,
+    `rating_count` = 342,
+    `level_update_time` = NOW(),
+    `avg_shipping_time` = 12
+WHERE `id` = 1;
+
+UPDATE `tb_merchant` SET 
+    `delivery_rate` = 95.20,
+    `on_time_rate` = 92.80,
+    `completion_rate` = 96.50,
+    `service_score` = 4.30,
+    `logistics_score` = 4.10,
+    `product_score` = 4.60,
+    `rating_count` = 215,
+    `level_update_time` = NOW(),
+    `avg_shipping_time` = 14
+WHERE `id` = 2;
+
+UPDATE `tb_merchant` SET 
+    `delivery_rate` = 96.70,
+    `on_time_rate` = 94.40,
+    `completion_rate` = 95.30,
+    `service_score` = 4.50,
+    `logistics_score` = 4.40,
+    `product_score` = 4.70,
+    `rating_count` = 187,
+    `level_update_time` = NOW(),
+    `avg_shipping_time` = 12
+WHERE `id` = 3;
+
+-- 测试数据：商家等级表
+INSERT INTO `tb_merchant_level` 
+    (`level_name`, `level_stars`, `min_score`, `max_score`, `min_delivery_rate`, 
+     `min_on_time_rate`, `min_completion_rate`, `commission_rate`, `priority`, `benefits`, `icon`, `remark`) 
+VALUES 
+    ('钻石商家', 5, 95, 100, 98.00, 95.00, 97.00, 5.00, 5, 
+     '专属客服、优先排序展示、运费险、低佣金比例、首页推荐', '/static/images/merchant/level/diamond.png', '最高级别商家'),
+    ('金牌商家', 4, 90, 94, 95.00, 92.00, 94.00, 8.00, 4, 
+     '专属客服、运费险、优先展示', '/static/images/merchant/level/gold.png', '高级别商家'),
+    ('银牌商家', 3, 80, 89, 90.00, 85.00, 90.00, 12.00, 3, 
+     '运费险、搜索页展示', '/static/images/merchant/level/silver.png', '中级别商家'),
+    ('铜牌商家', 2, 70, 79, 85.00, 80.00, 85.00, 15.00, 2, 
+     '基础服务', '/static/images/merchant/level/bronze.png', '低级别商家'),
+    ('标准商家', 1, 0, 69, 0.00, 0.00, 0.00, 20.00, 1, 
+     '基础服务', '/static/images/merchant/level/standard.png', '最低级别商家');
+
+-- 测试数据：商家评级历史表
+INSERT INTO `tb_merchant_rating_history` 
+    (`merchant_id`, `previous_level`, `current_level`, `previous_score`, `current_score`, `change_reason`, `remark`, `create_time`) 
+VALUES 
+    (1, 2, 3, 85, 96, '季度评估提升', '商家表现优秀', DATE_SUB(NOW(), INTERVAL 3 MONTH)),
+    (1, 3, 3, 96, 98, '月度评估维持', '商家表现稳定', DATE_SUB(NOW(), INTERVAL 1 MONTH)),
+    (2, 2, 3, 82, 95, '季度评估提升', '商家表现良好', DATE_SUB(NOW(), INTERVAL 3 MONTH)),
+    (2, 3, 2, 95, 88, '客户投诉率上升，评级下降', '商家表现下滑', DATE_SUB(NOW(), INTERVAL 15 DAY)),
+    (3, 1, 2, 65, 78, '月度评估提升', '商家表现有所提高', DATE_SUB(NOW(), INTERVAL 2 MONTH)),
+    (3, 2, 2, 78, 83, '月度评估维持', '商家表现稳定', DATE_SUB(NOW(), INTERVAL 1 MONTH));
+
+-- 测试数据：商家评价指标表
+-- 商家1的数据 (连续5天)
+INSERT INTO `tb_merchant_rating_metrics` 
+    (`merchant_id`, `metric_date`, `order_count`, `completed_count`, `on_time_count`, 
+     `delayed_count`, `cancelled_count`, `delivery_rate`, `on_time_rate`, 
+     `completion_rate`, `average_rating`, `avg_shipping_time`) 
+VALUES 
+    (1, DATE_SUB(CURDATE(), INTERVAL 5 DAY), 58, 56, 54, 2, 2, 96.55, 96.43, 96.55, 4.82, 11),
+    (1, DATE_SUB(CURDATE(), INTERVAL 4 DAY), 63, 62, 60, 2, 1, 98.41, 96.77, 98.41, 4.75, 12),
+    (1, DATE_SUB(CURDATE(), INTERVAL 3 DAY), 71, 70, 68, 2, 1, 98.59, 97.14, 98.59, 4.80, 10),
+    (1, DATE_SUB(CURDATE(), INTERVAL 2 DAY), 65, 64, 63, 1, 1, 98.46, 98.44, 98.46, 4.90, 11),
+    (1, DATE_SUB(CURDATE(), INTERVAL 1 DAY), 68, 67, 65, 2, 1, 98.53, 97.01, 98.53, 4.85, 12);
+
+-- 商家2的数据 (连续5天)
+INSERT INTO `tb_merchant_rating_metrics` 
+    (`merchant_id`, `metric_date`, `order_count`, `completed_count`, `on_time_count`, 
+     `delayed_count`, `cancelled_count`, `delivery_rate`, `on_time_rate`, 
+     `completion_rate`, `average_rating`, `avg_shipping_time`) 
+VALUES 
+    (2, DATE_SUB(CURDATE(), INTERVAL 5 DAY), 42, 39, 37, 2, 3, 92.86, 94.87, 92.86, 4.35, 14),
+    (2, DATE_SUB(CURDATE(), INTERVAL 4 DAY), 45, 43, 40, 3, 2, 95.56, 93.02, 95.56, 4.41, 15),
+    (2, DATE_SUB(CURDATE(), INTERVAL 3 DAY), 48, 45, 41, 4, 3, 93.75, 91.11, 93.75, 4.28, 16),
+    (2, DATE_SUB(CURDATE(), INTERVAL 2 DAY), 51, 48, 44, 4, 3, 94.12, 91.67, 94.12, 4.33, 14),
+    (2, DATE_SUB(CURDATE(), INTERVAL 1 DAY), 47, 45, 42, 3, 2, 95.74, 93.33, 95.74, 4.37, 13);
+
+-- 商家3的数据 (连续5天)
+INSERT INTO `tb_merchant_rating_metrics` 
+    (`merchant_id`, `metric_date`, `order_count`, `completed_count`, `on_time_count`, 
+     `delayed_count`, `cancelled_count`, `delivery_rate`, `on_time_rate`, 
+     `completion_rate`, `average_rating`, `avg_shipping_time`) 
+VALUES 
+    (3, DATE_SUB(CURDATE(), INTERVAL 5 DAY), 35, 33, 31, 2, 2, 94.29, 93.94, 94.29, 4.56, 12),
+    (3, DATE_SUB(CURDATE(), INTERVAL 4 DAY), 38, 36, 34, 2, 2, 94.74, 94.44, 94.74, 4.61, 13),
+    (3, DATE_SUB(CURDATE(), INTERVAL 3 DAY), 41, 39, 37, 2, 2, 95.12, 94.87, 95.12, 4.58, 12),
+    (3, DATE_SUB(CURDATE(), INTERVAL 2 DAY), 36, 35, 33, 2, 1, 97.22, 94.29, 97.22, 4.66, 11),
+    (3, DATE_SUB(CURDATE(), INTERVAL 1 DAY), 42, 40, 38, 2, 2, 95.24, 95.00, 95.24, 4.70, 12);
 ```
 
 
@@ -555,8 +729,6 @@ INSERT INTO `tb_stock_out` (`out_no`, `warehouse_id`, `merchant_id`, `out_type`,
 ('OUT20250401003', 3, 3, 1, 1, 30, 12000.00, '王经理', 301, '2025-04-01 16:30:00', '系统管理员', 20004, 'ORD20250401003', '春季新款运动鞋发货', '2025-04-01 15:20:00'),
 ('OUT20250402003', 1, 3, 1, 0, 25, 8750.00, '王助理', 302, NULL, NULL, 20005, 'ORD20250402002', '团购订单待审核', '2025-04-02 14:15:00'),
 ('OUT20250403002', 2, 3, 2, 1, 10, 3500.00, '王经理', 301, '2025-04-03 11:20:00', '质检部门', NULL, NULL, '质量问题退货', '2025-04-03 10:05:00');
-
-
 ```
 
 

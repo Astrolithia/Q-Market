@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="SqlDialectMappings">
+    <file url="file://$PROJECT_DIR$/RuoYi-Vue/sql/alertMenu.sql" dialect="MySQL" />
     <file url="file://$PROJECT_DIR$/RuoYi-Vue/sql/auditMenu.sql" dialect="MySQL" />
     <file url="file://$PROJECT_DIR$/RuoYi-Vue/sql/brandMenu.sql" dialect="MySQL" />
     <file url="file://$PROJECT_DIR$/RuoYi-Vue/sql/categoryMenu.sql" dialect="MySQL" />
@@ -18,6 +19,7 @@
     <file url="file://$PROJECT_DIR$/RuoYi-Vue/sql/productMenu.sql" dialect="MySQL" />
     <file url="file://$PROJECT_DIR$/RuoYi-Vue/sql/promotionMenu.sql" dialect="MySQL" />
     <file url="file://$PROJECT_DIR$/RuoYi-Vue/sql/quartz.sql" dialect="MySQL" />
+    <file url="file://$PROJECT_DIR$/RuoYi-Vue/sql/ratingMenu.sql" dialect="MySQL" />
     <file url="file://$PROJECT_DIR$/RuoYi-Vue/sql/ry_20240629.sql" dialect="MySQL" />
     <file url="file://$PROJECT_DIR$/RuoYi-Vue/sql/scoreMenu.sql" dialect="MySQL" />
     <file url="file://$PROJECT_DIR$/RuoYi-Vue/sql/settlementMenu.sql" dialect="MySQL" />
