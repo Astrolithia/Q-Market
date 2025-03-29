@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.manage.mapper.ProductAttributeMapper">
+    
+    <resultMap type="ProductAttribute" id="ProductAttributeResult">
+        <result property="id"    column="id"    />
+        <result property="name"    column="name"    />
+        <result property="categoryId"    column="category_id"    />
+        <result property="inputType"    column="input_type"    />
+        <result property="valueType"    column="value_type"    />
+        <result property="unit"    column="unit"    />
+        <result property="isSearch"    column="is_search"    />
+        <result property="isRequired"    column="is_required"    />
+        <result property="isSku"    column="is_sku"    />
+        <result property="sort"    column="sort"    />
+        <result property="status"    column="status"    />
+        <result property="createTime"    column="create_time"    />
+        <result property="updateTime"    column="update_time"    />
+        <result property="createBy"    column="create_by"    />
+        <result property="updateBy"    column="update_by"    />
+    </resultMap>
+
+    <sql id="selectProductAttributeVo">
+        select id, name, category_id, input_type, value_type, unit, is_search, is_required, is_sku, sort, status, create_time, update_time, create_by, update_by from tb_product_attribute
+    </sql>
+
+    <select id="selectProductAttributeList" parameterType="ProductAttribute" resultMap="ProductAttributeResult">
+        <include refid="selectProductAttributeVo"/>
+        <where>  
+            <if test="name != null  and name != ''"> and name like concat('%', #{name}, '%')</if>
+            <if test="categoryId != null "> and category_id = #{categoryId}</if>
+        </where>
+    </select>
+    
+    <select id="selectProductAttributeById" parameterType="Long" resultMap="ProductAttributeResult">
+        <include refid="selectProductAttributeVo"/>
+        where id = #{id}
+    </select>
+
+    <insert id="insertProductAttribute" parameterType="ProductAttribute" useGeneratedKeys="true" keyProperty="id">
+        insert into tb_product_attribute
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="name != null and name != ''">name,</if>
+            <if test="categoryId != null">category_id,</if>
+            <if test="inputType != null">input_type,</if>
+            <if test="valueType != null">value_type,</if>
+            <if test="unit != null">unit,</if>
+            <if test="isSearch != null">is_search,</if>
+            <if test="isRequired != null">is_required,</if>
+            <if test="isSku != null">is_sku,</if>
+            <if test="sort != null">sort,</if>
+            <if test="status != null">status,</if>
+            <if test="createTime != null">create_time,</if>
+            <if test="updateTime != null">update_time,</if>
+            <if test="createBy != null">create_by,</if>
+            <if test="updateBy != null">update_by,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="name != null and name != ''">#{name},</if>
+            <if test="categoryId != null">#{categoryId},</if>
+            <if test="inputType != null">#{inputType},</if>
+            <if test="valueType != null">#{valueType},</if>
+            <if test="unit != null">#{unit},</if>
+            <if test="isSearch != null">#{isSearch},</if>
+            <if test="isRequired != null">#{isRequired},</if>
+            <if test="isSku != null">#{isSku},</if>
+            <if test="sort != null">#{sort},</if>
+            <if test="status != null">#{status},</if>
+            <if test="createTime != null">#{createTime},</if>
+            <if test="updateTime != null">#{updateTime},</if>
+            <if test="createBy != null">#{createBy},</if>
+            <if test="updateBy != null">#{updateBy},</if>
+         </trim>
+    </insert>
+
+    <update id="updateProductAttribute" parameterType="ProductAttribute">
+        update tb_product_attribute
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="name != null and name != ''">name = #{name},</if>
+            <if test="categoryId != null">category_id = #{categoryId},</if>
+            <if test="inputType != null">input_type = #{inputType},</if>
+            <if test="valueType != null">value_type = #{valueType},</if>
+            <if test="unit != null">unit = #{unit},</if>
+            <if test="isSearch != null">is_search = #{isSearch},</if>
+            <if test="isRequired != null">is_required = #{isRequired},</if>
+            <if test="isSku != null">is_sku = #{isSku},</if>
+            <if test="sort != null">sort = #{sort},</if>
+            <if test="status != null">status = #{status},</if>
+            <if test="createTime != null">create_time = #{createTime},</if>
+            <if test="updateTime != null">update_time = #{updateTime},</if>
+            <if test="createBy != null">create_by = #{createBy},</if>
+            <if test="updateBy != null">update_by = #{updateBy},</if>
+        </trim>
+        where id = #{id}
+    </update>
+
+    <delete id="deleteProductAttributeById" parameterType="Long">
+        delete from tb_product_attribute where id = #{id}
+    </delete>
+
+    <delete id="deleteProductAttributeByIds" parameterType="String">
+        delete from tb_product_attribute where id in 
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+</mapper>

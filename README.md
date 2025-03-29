@@ -164,6 +164,87 @@ CREATE TABLE `tb_product_sku` (
   KEY `idx_product_id` (`product_id`),
   UNIQUE KEY `uk_sku_code` (`sku_code`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='商品SKU表';
+
+-- 商品属性定义表
+CREATE TABLE `tb_product_attribute` (
+  `id` BIGINT AUTO_INCREMENT COMMENT '属性ID',
+  `name` VARCHAR(64) NOT NULL COMMENT '属性名称',
+  `category_id` BIGINT COMMENT '所属分类ID',
+  `input_type` TINYINT DEFAULT 0 COMMENT '录入方式：0手工录入，1从列表选取，2多选',
+  `value_type` TINYINT DEFAULT 0 COMMENT '值类型：0字符串，1数字，2日期',
+  `unit` VARCHAR(20) COMMENT '单位',
+  `is_search` TINYINT DEFAULT 0 COMMENT '是否支持搜索：0否，1是',
+  `is_required` TINYINT DEFAULT 0 COMMENT '是否必填：0否，1是',
+  `is_sku` TINYINT DEFAULT 0 COMMENT '是否用于SKU：0否，1是',
+  `sort` INT DEFAULT 0 COMMENT '排序',
+  `status` TINYINT DEFAULT 1 COMMENT '状态：0禁用，1启用',
+  `create_time` DATETIME DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+  `update_time` DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+  `create_by` VARCHAR(64) COMMENT '创建人',
+  `update_by` VARCHAR(64) COMMENT '更新人',
+  PRIMARY KEY (`id`),
+  KEY `idx_category_id` (`category_id`),
+  CONSTRAINT `fk_attribute_category` FOREIGN KEY (`category_id`) REFERENCES `tb_category` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='商品属性定义表';
+
+-- 商品属性可选值表
+CREATE TABLE `tb_product_attribute_value` (
+  `id` BIGINT AUTO_INCREMENT COMMENT '属性值ID',
+  `attribute_id` BIGINT NOT NULL COMMENT '属性ID',
+  `value` VARCHAR(255) NOT NULL COMMENT '属性值',
+  `sort` INT DEFAULT 0 COMMENT '排序',
+  `create_time` DATETIME DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+  `update_time` DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+  PRIMARY KEY (`id`),
+  KEY `idx_attribute_id` (`attribute_id`),
+  CONSTRAINT `fk_attribute_value` FOREIGN KEY (`attribute_id`) REFERENCES `tb_product_attribute` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='商品属性可选值表';
+
+-- 商品-属性值关联表
+CREATE TABLE `tb_product_attribute_relation` (
+  `id` BIGINT AUTO_INCREMENT COMMENT '关联ID',
+  `product_id` BIGINT NOT NULL COMMENT '商品ID',
+  `attribute_id` BIGINT NOT NULL COMMENT '属性ID',
+  `attribute_value` VARCHAR(255) COMMENT '属性值',
+  `attribute_value_id` BIGINT COMMENT '属性值ID（选取类型时有值）',
+  `create_time` DATETIME DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+  PRIMARY KEY (`id`),
+  KEY `idx_product_id` (`product_id`),
+  KEY `idx_attribute_id` (`attribute_id`),
+  CONSTRAINT `fk_attribute_relation_product` FOREIGN KEY (`product_id`) REFERENCES `tb_product` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `fk_attribute_relation_attribute` FOREIGN KEY (`attribute_id`) REFERENCES `tb_product_attribute` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='商品-属性值关联表';
+
+-- 商品属性定义示例数据
+INSERT INTO `tb_product_attribute` (`name`, `category_id`, `input_type`, `value_type`, `unit`, `is_search`, `is_required`, `is_sku`, `sort`) VALUES
+('颜色', 4, 1, 0, NULL, 1, 1, 1, 1),
+('内存容量', 4, 1, 0, 'GB', 1, 1, 1, 2),
+('重量', 4, 0, 1, 'g', 0, 1, 0, 3),
+('产地', 4, 0, 0, NULL, 1, 1, 0, 4),
+('尺寸', 9, 1, 0, NULL, 1, 1, 1, 1),
+('材质', 9, 1, 0, NULL, 1, 0, 0, 2);
+
+-- 属性可选值示例数据
+INSERT INTO `tb_product_attribute_value` (`attribute_id`, `value`, `sort`) VALUES
+(1, '黑色', 1),
+(1, '白色', 2),
+(1, '金色', 3),
+(1, '银色', 4),
+(2, '128GB', 1),
+(2, '256GB', 2),
+(2, '512GB', 3),
+(2, '1TB', 4),
+(5, '36', 1),
+(5, '37', 2),
+(5, '38', 3),
+(5, '39', 4),
+(5, '40', 5),
+(5, '41', 6),
+(5, '42', 7),
+(5, '43', 8),
+(6, '真皮', 1),
+(6, '人造革', 2),
+(6, '织物', 3);
 ```
 
 
@@ -248,6 +329,74 @@ CREATE TABLE `tb_order_logistics` (
   KEY `idx_logistics_no` (`logistics_no`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='订单物流表';
 ```
+
+
+
+##### 
+
+```
+-- 库存调拨单表
+CREATE TABLE `tb_inventory_transfer` (
+  `id` BIGINT AUTO_INCREMENT COMMENT '调拨单ID',
+  `transfer_no` VARCHAR(32) NOT NULL COMMENT '调拨单号',
+  `out_warehouse_id` BIGINT NOT NULL COMMENT '调出仓库ID',
+  `in_warehouse_id` BIGINT NOT NULL COMMENT '调入仓库ID',
+  `merchant_id` BIGINT COMMENT '商家ID',
+  `status` TINYINT DEFAULT 0 COMMENT '状态：0草稿，1待出库，2已出库待入库，3已完成，4已取消',
+  `total_quantity` INT DEFAULT 0 COMMENT '调拨总数量',
+  `total_amount` DECIMAL(12,2) DEFAULT 0 COMMENT '调拨总金额',
+  `operator` VARCHAR(64) COMMENT '操作人',
+  `operator_id` BIGINT COMMENT '操作人ID',
+  `out_time` DATETIME COMMENT '出库时间',
+  `in_time` DATETIME COMMENT '入库时间',
+  `out_operator` VARCHAR(64) COMMENT '出库操作人',
+  `in_operator` VARCHAR(64) COMMENT '入库操作人',
+  `out_stock_no` VARCHAR(32) COMMENT '关联出库单号',
+  `in_stock_no` VARCHAR(32) COMMENT '关联入库单号',
+  `reason` VARCHAR(512) COMMENT '调拨原因',
+  `remark` VARCHAR(512) COMMENT '备注',
+  `create_time` DATETIME DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+  `update_time` DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+  `create_by` VARCHAR(64) COMMENT '创建人',
+  `update_by` VARCHAR(64) COMMENT '更新人',
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `uk_transfer_no` (`transfer_no`),
+  KEY `idx_out_warehouse_id` (`out_warehouse_id`),
+  KEY `idx_in_warehouse_id` (`in_warehouse_id`),
+  KEY `idx_merchant_id` (`merchant_id`),
+  KEY `idx_out_stock_no` (`out_stock_no`),
+  KEY `idx_in_stock_no` (`in_stock_no`),
+  CONSTRAINT `fk_transfer_merchant` FOREIGN KEY (`merchant_id`) REFERENCES `tb_merchant` (`id`) ON DELETE RESTRICT ON UPDATE CASCADE,
+  CONSTRAINT `fk_transfer_out_warehouse` FOREIGN KEY (`out_warehouse_id`) REFERENCES `tb_warehouse` (`id`) ON DELETE RESTRICT ON UPDATE CASCADE,
+  CONSTRAINT `fk_transfer_in_warehouse` FOREIGN KEY (`in_warehouse_id`) REFERENCES `tb_warehouse` (`id`) ON DELETE RESTRICT ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='库存调拨单表';
+
+-- 库存调拨单明细表
+CREATE TABLE `tb_inventory_transfer_item` (
+  `id` BIGINT AUTO_INCREMENT COMMENT '明细ID',
+  `transfer_id` BIGINT NOT NULL COMMENT '调拨单ID',
+  `transfer_no` VARCHAR(32) NOT NULL COMMENT '调拨单号',
+  `product_id` BIGINT NOT NULL COMMENT '商品ID',
+  `sku_id` BIGINT NOT NULL COMMENT 'SKU ID',
+  `product_name` VARCHAR(200) NOT NULL COMMENT '商品名称',
+  `sku_spec` VARCHAR(200) COMMENT 'SKU规格',
+  `quantity` INT NOT NULL COMMENT '调拨数量',
+  `cost_price` DECIMAL(10,2) COMMENT '成本价',
+  `amount` DECIMAL(12,2) DEFAULT 0 COMMENT '金额',
+  `remark` VARCHAR(512) COMMENT '备注',
+  `create_time` DATETIME DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+  `update_time` DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+  `create_by` VARCHAR(64) COMMENT '创建人',
+  `update_by` VARCHAR(64) COMMENT '更新人',
+  PRIMARY KEY (`id`),
+  KEY `idx_transfer_id` (`transfer_id`),
+  KEY `idx_transfer_no` (`transfer_no`),
+  KEY `idx_product_id` (`product_id`),
+  KEY `idx_sku_id` (`sku_id`),
+  CONSTRAINT `fk_inventory_transfer_item` FOREIGN KEY (`transfer_id`) REFERENCES `tb_inventory_transfer` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='库存调拨单明细表';
+```
+
 
 
 ### 4. 营销管理模块
@@ -730,6 +879,253 @@ INSERT INTO `tb_stock_out` (`out_no`, `warehouse_id`, `merchant_id`, `out_type`,
 ('OUT20250402003', 1, 3, 1, 0, 25, 8750.00, '王助理', 302, NULL, NULL, 20005, 'ORD20250402002', '团购订单待审核', '2025-04-02 14:15:00'),
 ('OUT20250403002', 2, 3, 2, 1, 10, 3500.00, '王经理', 301, '2025-04-03 11:20:00', '质检部门', NULL, NULL, '质量问题退货', '2025-04-03 10:05:00');
 ```
+
+
+
+##### 库存盘点模块
+
+```sql
+-- 库存盘点单表
+CREATE TABLE `tb_inventory_check` (
+  `id` BIGINT AUTO_INCREMENT COMMENT '盘点单ID',
+  `check_no` VARCHAR(32) NOT NULL COMMENT '盘点单号',
+  `warehouse_id` BIGINT NOT NULL COMMENT '仓库ID',
+  `merchant_id` BIGINT COMMENT '商家ID',
+  `check_type` TINYINT DEFAULT 1 COMMENT '盘点类型：1全面盘点，2抽样盘点，3动态盘点',
+  `status` TINYINT DEFAULT 0 COMMENT '状态：0草稿，1待审核，2已审核，3已取消',
+  `total_quantity` INT DEFAULT 0 COMMENT '盘点总数量',
+  `profit_quantity` INT DEFAULT 0 COMMENT '盘盈数量',
+  `loss_quantity` INT DEFAULT 0 COMMENT '盘亏数量',
+  `profit_amount` DECIMAL(12,2) DEFAULT 0 COMMENT '盘盈金额',
+  `loss_amount` DECIMAL(12,2) DEFAULT 0 COMMENT '盘亏金额',
+  `operator` VARCHAR(64) COMMENT '操作人',
+  `operator_id` BIGINT COMMENT '操作人ID',
+  `check_time` DATETIME COMMENT '盘点时间',
+  `audit_time` DATETIME COMMENT '审核时间',
+  `auditor` VARCHAR(64) COMMENT '审核人',
+  `remark` VARCHAR(512) COMMENT '备注',
+  `create_time` DATETIME DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+  `update_time` DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+  `create_by` VARCHAR(64) COMMENT '创建人',
+  `update_by` VARCHAR(64) COMMENT '更新人',
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `uk_check_no` (`check_no`),
+  KEY `idx_warehouse_id` (`warehouse_id`),
+  KEY `idx_merchant_id` (`merchant_id`),
+  CONSTRAINT `fk_inventory_check_merchant` FOREIGN KEY (`merchant_id`) REFERENCES `tb_merchant` (`id`) ON DELETE RESTRICT ON UPDATE CASCADE,
+  CONSTRAINT `fk_inventory_check_warehouse` FOREIGN KEY (`warehouse_id`) REFERENCES `tb_warehouse` (`id`) ON DELETE RESTRICT ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='库存盘点单表';
+
+-- 库存盘点单明细表
+CREATE TABLE `tb_inventory_check_item` (
+  `id` BIGINT AUTO_INCREMENT COMMENT '明细ID',
+  `check_id` BIGINT NOT NULL COMMENT '盘点单ID',
+  `check_no` VARCHAR(32) NOT NULL COMMENT '盘点单号',
+  `product_id` BIGINT NOT NULL COMMENT '商品ID',
+  `sku_id` BIGINT NOT NULL COMMENT 'SKU ID',
+  `product_name` VARCHAR(200) NOT NULL COMMENT '商品名称',
+  `sku_spec` VARCHAR(200) COMMENT 'SKU规格',
+  `system_quantity` INT DEFAULT 0 COMMENT '系统数量',
+  `actual_quantity` INT DEFAULT 0 COMMENT '实际数量',
+  `difference_quantity` INT DEFAULT 0 COMMENT '差异数量',
+  `cost_price` DECIMAL(10,2) COMMENT '成本价',
+  `difference_amount` DECIMAL(12,2) DEFAULT 0 COMMENT '差异金额',
+  `difference_type` TINYINT COMMENT '差异类型：1盘盈，2盘亏，0无差异',
+  `remark` VARCHAR(512) COMMENT '备注',
+  `create_time` DATETIME DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+  `update_time` DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+  `create_by` VARCHAR(64) COMMENT '创建人',
+  `update_by` VARCHAR(64) COMMENT '更新人',
+  PRIMARY KEY (`id`),
+  KEY `idx_check_id` (`check_id`),
+  KEY `idx_check_no` (`check_no`),
+  KEY `idx_product_id` (`product_id`),
+  KEY `idx_sku_id` (`sku_id`),
+  CONSTRAINT `fk_inventory_check_item` FOREIGN KEY (`check_id`) REFERENCES `tb_inventory_check` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='库存盘点单明细表';
+
+-- 库存盘点单测试数据
+INSERT INTO `tb_inventory_check` 
+(`check_no`, `warehouse_id`, `merchant_id`, `check_type`, `status`, `total_quantity`, 
+`profit_quantity`, `loss_quantity`, `profit_amount`, `loss_amount`, `operator`, 
+`operator_id`, `check_time`, `audit_time`, `auditor`, `remark`, `create_time`) 
+VALUES 
+-- 苹果官方旗舰店(ID=1)的盘点记录
+('CHK20250410001', 1, 1, 1, 2, 150, 3, 5, 5997.00, 9995.00, '张经理', 
+101, '2025-04-10 09:30:00', '2025-04-10 15:30:00', '系统管理员', '季度全面盘点', '2025-04-10 08:15:00'),
+
+('CHK20250420001', 2, 1, 2, 1, 80, 0, 2, 0.00, 3998.00, '张助理', 
+102, '2025-04-20 10:15:00', NULL, NULL, '月度抽样盘点', '2025-04-20 09:30:00'),
+
+-- 三星官方旗舰店(ID=2)的盘点记录
+('CHK20250412001', 3, 2, 1, 2, 120, 4, 2, 7996.00, 3998.00, '李经理', 
+201, '2025-04-12 14:00:00', '2025-04-12 17:30:00', '系统管理员', '季度全面盘点', '2025-04-12 13:20:00'),
+
+-- 耐克官方旗舰店(ID=3)的盘点记录
+('CHK20250415001', 2, 3, 3, 0, 200, 0, 0, 0.00, 0.00, '王经理', 
+301, NULL, NULL, NULL, '动态盘点草稿', '2025-04-15 11:45:00');
+
+-- 库存盘点单明细测试数据
+INSERT INTO `tb_inventory_check_item` 
+(`check_id`, `check_no`, `product_id`, `sku_id`, `product_name`, `sku_spec`, 
+`system_quantity`, `actual_quantity`, `difference_quantity`, `cost_price`, 
+`difference_amount`, `difference_type`, `remark`) 
+VALUES 
+-- 苹果官方旗舰店盘点明细 (check_id=1)
+(1, 'CHK20250410001', 101, 1001, 'iPhone 15 Pro', '256GB 深空黑', 
+50, 48, -2, 1999.00, -3998.00, 2, '可能有丢失'),
+
+(1, 'CHK20250410001', 102, 1002, 'iPhone 15 Pro Max', '512GB 银色', 
+30, 33, 3, 1999.00, 5997.00, 1, '系统录入错误'),
+
+(1, 'CHK20250410001', 103, 1003, 'AirPods Pro', '第二代', 
+70, 67, -3, 1999.00, -5997.00, 2, '展示样品未及时登记'),
+
+-- 苹果官方旗舰店盘点明细 (check_id=2)
+(2, 'CHK20250420001', 101, 1001, 'iPhone 15 Pro', '256GB 深空黑', 
+40, 38, -2, 1999.00, -3998.00, 2, '待查明原因'),
+
+(2, 'CHK20250420001', 104, 1004, 'iPad Air', '256GB WiFi版', 
+40, 40, 0, 799.00, 0.00, 0, '数量一致'),
+
+-- 三星官方旗舰店盘点明细 (check_id=3)
+(3, 'CHK20250412001', 201, 2001, 'Galaxy S23', '256GB 午夜黑', 
+45, 43, -2, 1999.00, -3998.00, 2, '展示样品未登记'),
+
+(3, 'CHK20250412001', 202, 2002, 'Galaxy Tab S9', '128GB 银色', 
+35, 39, 4, 1999.00, 7996.00, 1, '入库单漏录'),
+
+(3, 'CHK20250412001', 203, 2003, 'Galaxy Watch 6', '44mm 黑色', 
+40, 40, 0, 399.00, 0.00, 0, '数量一致');
+```
+
+
+
+##### 库存调拨模块
+
+```sql
+-- 库存调拨单表
+CREATE TABLE `tb_inventory_transfer` (
+  `id` BIGINT AUTO_INCREMENT COMMENT '调拨单ID',
+  `transfer_no` VARCHAR(32) NOT NULL COMMENT '调拨单号',
+  `out_warehouse_id` BIGINT NOT NULL COMMENT '调出仓库ID',
+  `in_warehouse_id` BIGINT NOT NULL COMMENT '调入仓库ID',
+  `merchant_id` BIGINT COMMENT '商家ID',
+  `status` TINYINT DEFAULT 0 COMMENT '状态：0草稿，1待出库，2已出库待入库，3已完成，4已取消',
+  `total_quantity` INT DEFAULT 0 COMMENT '调拨总数量',
+  `total_amount` DECIMAL(12,2) DEFAULT 0 COMMENT '调拨总金额',
+  `operator` VARCHAR(64) COMMENT '操作人',
+  `operator_id` BIGINT COMMENT '操作人ID',
+  `out_time` DATETIME COMMENT '出库时间',
+  `in_time` DATETIME COMMENT '入库时间',
+  `out_operator` VARCHAR(64) COMMENT '出库操作人',
+  `in_operator` VARCHAR(64) COMMENT '入库操作人',
+  `out_stock_no` VARCHAR(32) COMMENT '关联出库单号',
+  `in_stock_no` VARCHAR(32) COMMENT '关联入库单号',
+  `reason` VARCHAR(512) COMMENT '调拨原因',
+  `remark` VARCHAR(512) COMMENT '备注',
+  `create_time` DATETIME DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+  `update_time` DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+  `create_by` VARCHAR(64) COMMENT '创建人',
+  `update_by` VARCHAR(64) COMMENT '更新人',
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `uk_transfer_no` (`transfer_no`),
+  KEY `idx_out_warehouse_id` (`out_warehouse_id`),
+  KEY `idx_in_warehouse_id` (`in_warehouse_id`),
+  KEY `idx_merchant_id` (`merchant_id`),
+  KEY `idx_out_stock_no` (`out_stock_no`),
+  KEY `idx_in_stock_no` (`in_stock_no`),
+  CONSTRAINT `fk_transfer_merchant` FOREIGN KEY (`merchant_id`) REFERENCES `tb_merchant` (`id`) ON DELETE RESTRICT ON UPDATE CASCADE,
+  CONSTRAINT `fk_transfer_out_warehouse` FOREIGN KEY (`out_warehouse_id`) REFERENCES `tb_warehouse` (`id`) ON DELETE RESTRICT ON UPDATE CASCADE,
+  CONSTRAINT `fk_transfer_in_warehouse` FOREIGN KEY (`in_warehouse_id`) REFERENCES `tb_warehouse` (`id`) ON DELETE RESTRICT ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='库存调拨单表';
+
+-- 库存调拨单明细表
+CREATE TABLE `tb_inventory_transfer_item` (
+  `id` BIGINT AUTO_INCREMENT COMMENT '明细ID',
+  `transfer_id` BIGINT NOT NULL COMMENT '调拨单ID',
+  `transfer_no` VARCHAR(32) NOT NULL COMMENT '调拨单号',
+  `product_id` BIGINT NOT NULL COMMENT '商品ID',
+  `sku_id` BIGINT NOT NULL COMMENT 'SKU ID',
+  `product_name` VARCHAR(200) NOT NULL COMMENT '商品名称',
+  `sku_spec` VARCHAR(200) COMMENT 'SKU规格',
+  `quantity` INT NOT NULL COMMENT '调拨数量',
+  `cost_price` DECIMAL(10,2) COMMENT '成本价',
+  `amount` DECIMAL(12,2) DEFAULT 0 COMMENT '金额',
+  `remark` VARCHAR(512) COMMENT '备注',
+  `create_time` DATETIME DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+  `update_time` DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+  `create_by` VARCHAR(64) COMMENT '创建人',
+  `update_by` VARCHAR(64) COMMENT '更新人',
+  PRIMARY KEY (`id`),
+  KEY `idx_transfer_id` (`transfer_id`),
+  KEY `idx_transfer_no` (`transfer_no`),
+  KEY `idx_product_id` (`product_id`),
+  KEY `idx_sku_id` (`sku_id`),
+  CONSTRAINT `fk_inventory_transfer_item` FOREIGN KEY (`transfer_id`) REFERENCES `tb_inventory_transfer` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='库存调拨单明细表';
+
+-- 库存调拨单测试数据
+INSERT INTO `tb_inventory_transfer` 
+(`transfer_no`, `out_warehouse_id`, `in_warehouse_id`, `merchant_id`, `status`, 
+`total_quantity`, `total_amount`, `operator`, `operator_id`, `out_time`, 
+`in_time`, `out_operator`, `in_operator`, `out_stock_no`, `in_stock_no`, 
+`reason`, `remark`, `create_time`) 
+VALUES 
+-- 苹果官方旗舰店(ID=1)的调拨记录
+('TRF20250403001', 1, 2, 1, 3, 15, 22500.00, '张经理', 101, '2025-04-03 14:30:00', 
+'2025-04-03 16:45:00', '张经理', '李经理', 'OUT20250403001', 'IN20250403002', 
+'上海分仓库存不足', '季度库存调整', '2025-04-03 10:15:00'),
+
+('TRF20250405001', 1, 3, 1, 1, 10, 15000.00, '张助理', 102, NULL, 
+NULL, NULL, NULL, NULL, NULL, 
+'北京分仓新开业备货', '待出库', '2025-04-05 09:30:00'),
+
+-- 三星官方旗舰店(ID=2)的调拨记录
+('TRF20250404001', 3, 2, 2, 2, 8, 16000.00, '李经理', 201, '2025-04-04 11:20:00', 
+NULL, '李经理', NULL, 'OUT20250404001', NULL, 
+'上海门店促销活动备货', '已出库待入库', '2025-04-04 09:15:00'),
+
+-- 耐克官方旗舰店(ID=3)的调拨记录
+('TRF20250406001', 2, 1, 3, 0, 20, 7000.00, '王经理', 301, NULL, 
+NULL, NULL, NULL, NULL, NULL, 
+'北京仓库新品调拨', '草稿状态', '2025-04-06 14:20:00');
+
+-- 库存调拨单明细测试数据
+INSERT INTO `tb_inventory_transfer_item` 
+(`transfer_id`, `transfer_no`, `product_id`, `sku_id`, `product_name`, 
+`sku_spec`, `quantity`, `cost_price`, `amount`, `remark`) 
+VALUES 
+-- 苹果官方旗舰店调拨明细 (transfer_id=1)
+(1, 'TRF20250403001', 101, 1001, 'iPhone 15 Pro', 
+'256GB 深空黑', 5, 1500.00, 7500.00, '热销机型'),
+
+(1, 'TRF20250403001', 102, 1002, 'iPhone 15 Pro Max', 
+'512GB 银色', 10, 1500.00, 15000.00, '高端机型'),
+
+-- 苹果官方旗舰店调拨明细 (transfer_id=2)
+(2, 'TRF20250405001', 101, 1001, 'iPhone 15 Pro', 
+'256GB 深空黑', 5, 1500.00, 7500.00, ''),
+
+(2, 'TRF20250405001', 102, 1002, 'iPhone 15 Pro Max', 
+'512GB 银色', 5, 1500.00, 7500.00, ''),
+
+-- 三星官方旗舰店调拨明细 (transfer_id=3)
+(3, 'TRF20250404001', 201, 2001, 'Galaxy S23', 
+'256GB 午夜黑', 8, 2000.00, 16000.00, '促销活动备货'),
+
+-- 耐克官方旗舰店调拨明细 (transfer_id=4)
+(4, 'TRF20250406001', 301, 3001, 'Air Jordan', 
+'42码 黑红色', 10, 350.00, 3500.00, ''),
+
+(4, 'TRF20250406001', 302, 3002, 'Air Max', 
+'41码 白色', 10, 350.00, 3500.00, '');
+```
+
+
+
+
+
 
 
 ### 7. 数据统计与报表模块

@@ -25,7 +25,7 @@ import com.ruoyi.common.core.page.TableDataInfo;
  * 商品分类管理Controller
  * 
  * @author shiro
- * @date 2025-03-27
+ * @date 2025-03-29
  */
 @RestController
 @RequestMapping("/product/category")

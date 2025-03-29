@@ -7,7 +7,7 @@ import com.ruoyi.manage.domain.ProductCategory;
  * 商品分类管理Mapper接口
  * 
  * @author shiro
- * @date 2025-03-27
+ * @date 2025-03-29
  */
 public interface ProductCategoryMapper 
 {

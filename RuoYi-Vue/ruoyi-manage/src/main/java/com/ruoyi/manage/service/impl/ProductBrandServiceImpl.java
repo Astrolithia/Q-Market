@@ -12,7 +12,7 @@ import com.ruoyi.manage.service.IProductBrandService;
  * 商品品牌管理Service业务层处理
  * 
  * @author shiro
- * @date 2025-03-27
+ * @date 2025-03-29
  */
 @Service
 public class ProductBrandServiceImpl implements IProductBrandService 

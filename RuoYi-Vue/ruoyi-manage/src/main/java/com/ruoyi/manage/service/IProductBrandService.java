@@ -7,7 +7,7 @@ import com.ruoyi.manage.domain.ProductBrand;
  * 商品品牌管理Service接口
  * 
  * @author shiro
- * @date 2025-03-27
+ * @date 2025-03-29
  */
 public interface IProductBrandService 
 {

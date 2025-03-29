@@ -64,7 +64,11 @@
       <el-table-column label="品牌logo" align="center" prop="logo" />
       <el-table-column label="品牌描述" align="center" prop="description" />
       <el-table-column label="排序" align="center" prop="sort" />
-      <el-table-column label="是否显示：0不显示，1显示" align="center" prop="isShow" />
+      <el-table-column label="创建时间" align="center" prop="createTime" width="180">
+        <template #default="scope">
+          <span>{{ parseTime(scope.row.createTime, '{y}-{m}-{d}') }}</span>
+        </template>
+      </el-table-column>
       <el-table-column label="操作" align="center" class-name="small-padding fixed-width">
         <template #default="scope">
           <el-button link type="primary" icon="Edit" @click="handleUpdate(scope.row)" v-hasPermi="['product:brand:edit']">修改</el-button>
@@ -131,7 +135,6 @@ const data = reactive({
     pageNum: 1,
     pageSize: 10,
     name: null,
-    description: null,
   },
   rules: {
     name: [

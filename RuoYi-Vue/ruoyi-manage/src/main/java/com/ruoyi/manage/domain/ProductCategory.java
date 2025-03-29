@@ -9,13 +9,14 @@ import com.ruoyi.common.core.domain.BaseEntity;
  * 商品分类管理对象 tb_category
  * 
  * @author shiro
- * @date 2025-03-27
+ * @date 2025-03-29
  */
 public class ProductCategory extends BaseEntity
 {
     private static final long serialVersionUID = 1L;
 
     /** 分类ID */
+    @Excel(name = "分类ID")
     private Long id;
 
     /** 父分类ID */
@@ -34,7 +35,6 @@ public class ProductCategory extends BaseEntity
     private Long sort;
 
     /** 图标 */
-    @Excel(name = "图标")
     private String icon;
 
     /** 是否显示：0不显示，1显示 */

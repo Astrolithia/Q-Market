@@ -63,7 +63,6 @@
       <el-table-column label="分类名称" align="center" prop="name" />
       <el-table-column label="层级" align="center" prop="level" />
       <el-table-column label="排序" align="center" prop="sort" />
-      <el-table-column label="图标" align="center" prop="icon" />
       <el-table-column label="是否显示：0不显示，1显示" align="center" prop="isShow" />
       <el-table-column label="操作" align="center" class-name="small-padding fixed-width">
         <template #default="scope">
@@ -84,11 +83,11 @@
     <!-- 添加或修改商品分类管理对话框 -->
     <el-dialog :title="title" v-model="open" width="500px" append-to-body>
       <el-form ref="categoryRef" :model="form" :rules="rules" label-width="80px">
+        <el-form-item label="父分类ID" prop="parentId">
+          <el-input v-model="form.parentId" placeholder="请输入父分类ID" />
+        </el-form-item>
         <el-form-item label="分类名称" prop="name">
           <el-input v-model="form.name" placeholder="请输入分类名称" />
-        </el-form-item>
-        <el-form-item label="层级" prop="level">
-          <el-input v-model="form.level" placeholder="请输入层级" />
         </el-form-item>
         <el-form-item label="排序" prop="sort">
           <el-input v-model="form.sort" placeholder="请输入排序" />

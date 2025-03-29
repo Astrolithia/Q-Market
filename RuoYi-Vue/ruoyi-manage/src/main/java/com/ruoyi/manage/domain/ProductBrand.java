@@ -9,13 +9,14 @@ import com.ruoyi.common.core.domain.BaseEntity;
  * 商品品牌管理对象 tb_brand
  * 
  * @author shiro
- * @date 2025-03-27
+ * @date 2025-03-29
  */
 public class ProductBrand extends BaseEntity
 {
     private static final long serialVersionUID = 1L;
 
     /** 品牌ID */
+    @Excel(name = "品牌ID")
     private Long id;
 
     /** 品牌名称 */
@@ -35,7 +36,6 @@ public class ProductBrand extends BaseEntity
     private Long sort;
 
     /** 是否显示：0不显示，1显示 */
-    @Excel(name = "是否显示：0不显示，1显示")
     private Integer isShow;
 
     public void setId(Long id) 
