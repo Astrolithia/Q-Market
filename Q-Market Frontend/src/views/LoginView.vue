@@ -1,8 +1,12 @@
 <script setup>
 import { ref, reactive } from 'vue'
-import { useRouter } from 'vue-router'
+import { useRouter, useRoute } from 'vue-router'
+import { useUserStore } from '@/stores/user'
+import { loginUser } from '@/mock/data.js'
 
 const router = useRouter()
+const route = useRoute()
+const userStore = useUserStore()
 const activeTab = ref('login')
 
 // 登录表单数据
@@ -99,15 +103,47 @@ const registerFormRef = ref(null)
 // 忘记密码表单引用
 const forgotFormRef = ref(null)
 
+const loading = ref(false)
+const loginError = ref('')
+
 // 登录处理
-const handleLogin = () => {
-  loginFormRef.value.validate((valid) => {
-    if (valid) {
-      // 这里应该调用登录API
-      ElMessage.success('登录成功')
-      router.push('/')
+const handleLogin = async () => {
+  if (!loginFormRef.value) return
+  
+  try {
+    await loginFormRef.value.validate()
+    
+    loading.value = true
+    loginError.value = ''
+    
+    // 使用mock数据进行登录验证
+    const result = loginUser(loginForm.username, loginForm.password)
+    
+    if (result.success) {
+      // 登录成功，存储用户信息到store
+      userStore.login(result.data.userInfo, result.data.token)
+      
+      // 跳转到之前的页面或首页
+      const redirectUrl = route.query.redirect || '/'
+      router.push(redirectUrl)
+      
+      ElMessage({
+        type: 'success',
+        message: '登录成功'
+      })
+    } else {
+      // 登录失败
+      loginError.value = result.message
+      ElMessage({
+        type: 'error',
+        message: result.message
+      })
     }
-  })
+  } catch (error) {
+    console.error('表单验证失败', error)
+  } finally {
+    loading.value = false
+  }
 }
 
 // 注册处理
@@ -155,6 +191,11 @@ const backToLogin = () => {
 const thirdPartyLogin = (platform) => {
   ElMessage.info(`正在使用${platform}登录...`)
   // 这里应该实现第三方登录逻辑
+}
+
+// 去注册页面
+const goToRegister = () => {
+  router.push('/register')
 }
 </script>
 

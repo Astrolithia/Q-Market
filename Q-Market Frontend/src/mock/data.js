@@ -426,4 +426,122 @@ export const searchProducts = (keyword) => {
            product.category.toLowerCase().includes(keyword) ||
            (product.brand && product.brand.toLowerCase().includes(keyword));
   });
+};
+
+// 添加测试用户数据
+export const users = [
+  {
+    id: 1001,
+    username: 'demo',
+    password: 'password', // 实际项目中应加密，这里为演示明文存储
+    email: 'demo@example.com',
+    nickname: '测试用户',
+    phone: '13800138000',
+    avatar: 'https://cube.elemecdn.com/0/88/03b0d39583f48206768a7534e55bcpng.png',
+    gender: '男',
+    birthday: '1990-01-01',
+    roles: ['user'],
+    permissions: ['profile:view', 'order:view', 'order:create'],
+    createTime: '2023-01-01',
+    lastLoginTime: '2023-06-01',
+    address: [
+      {
+        id: 1,
+        name: '张三',
+        phone: '13800138000',
+        province: '广东省',
+        city: '深圳市',
+        district: '南山区',
+        address: '科技园南区A栋15楼',
+        isDefault: true
+      },
+      {
+        id: 2,
+        name: '李四',
+        phone: '13900139000',
+        province: '广东省',
+        city: '广州市',
+        district: '天河区',
+        address: '天河路385号',
+        isDefault: false
+      }
+    ]
+  },
+  {
+    id: 1002,
+    username: 'admin',
+    password: 'admin123',
+    email: 'admin@example.com',
+    nickname: '管理员',
+    phone: '13900139000',
+    avatar: 'https://cube.elemecdn.com/9/c2/f0ee8a3c7c9638a54940382568c9dpng.png',
+    gender: '女',
+    birthday: '1988-06-15',
+    roles: ['admin', 'user'],
+    permissions: ['*'], // 管理员拥有所有权限
+    createTime: '2023-01-01',
+    lastLoginTime: '2023-06-10',
+    address: [
+      {
+        id: 3,
+        name: '管理员',
+        phone: '13900139000',
+        province: '北京市',
+        city: '北京市',
+        district: '朝阳区',
+        address: '建国路89号',
+        isDefault: true
+      }
+    ]
+  }
+];
+
+// 添加用户登录验证函数
+export const loginUser = (username, password) => {
+  const user = users.find(
+    user => (user.username === username || user.email === username) && user.password === password
+  );
+  
+  if (user) {
+    // 创建返回用户数据的副本，不包括密码
+    const { password, ...userInfo } = user;
+    
+    // 生成模拟token
+    const token = `mock-token-${userInfo.id}-${Date.now()}`;
+    
+    return {
+      success: true,
+      data: {
+        token,
+        userInfo
+      },
+      message: '登录成功'
+    };
+  }
+  
+  return {
+    success: false,
+    data: null,
+    message: '用户名或密码错误'
+  };
+};
+
+// 添加获取用户信息函数
+export const getUserInfo = (userId) => {
+  const user = users.find(user => user.id === userId);
+  
+  if (user) {
+    const { password, ...userInfo } = user;
+    return {
+      success: true,
+      data: userInfo,
+      message: '获取用户信息成功'
+    };
+  }
+  
+  return {
+    success: false,
+    data: null,
+    message: '用户不存在'
+  };
 }; 
