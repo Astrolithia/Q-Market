@@ -1,12 +1,12 @@
 <template>
   <div class="app-container">
     <el-form :model="queryParams" ref="queryRef" :inline="true" v-show="showSearch" label-width="68px">
-      <el-form-item label="订单编号" prop="orderNo">
+      <el-form-item label="订单编号"  prop="orderNo" >
         <el-input
           v-model="queryParams.orderNo"
           placeholder="请输入订单编号"
           clearable
-          @keyup.enter="handleQuery"
+          @keyup.enter="handleQuery" 
         />
       </el-form-item>
       <el-form-item label="客户ID" prop="customerId">
@@ -98,14 +98,22 @@
       <el-table-column label="实付金额" align="center" prop="payAmount" />
       <el-table-column label="优惠金额" align="center" prop="discountAmount" />
       <el-table-column label="运费" align="center" prop="shippingFee" />
-      <el-table-column label="支付方式：1支付宝，2微信，3银行卡" align="center" prop="payType" />
+      <el-table-column label="支付方式" align="center" prop="payType">
+  <template #default="scope">
+    {{ payTypeMap[scope.row.payType] || scope.row.payType }}
+  </template>
+</el-table-column>
       <el-table-column label="支付时间" align="center" prop="payTime" width="180">
         <template #default="scope">
           <span>{{ parseTime(scope.row.payTime, '{y}-{m}-{d}') }}</span>
         </template>
       </el-table-column>
       <el-table-column label="支付流水号" align="center" prop="payNo" />
-      <el-table-column label="订单状态：0待付款，1待发货，2待收货，3已完成，4已取消，5退款中，6已退款" align="center" prop="orderStatus" />
+      <el-table-column label="订单状态" align="center" prop="orderStatus">
+  <template #default="scope">
+    {{ orderStatusMap[scope.row.orderStatus] || scope.row.orderStatus }}
+  </template>
+</el-table-column>
       <el-table-column label="收货人" align="center" prop="consignee" />
       <el-table-column label="联系电话" align="center" prop="mobile" />
       <el-table-column label="收货地址" align="center" prop="address" />
@@ -203,6 +211,24 @@ const single = ref(true);
 const multiple = ref(true);
 const total = ref(0);
 const title = ref("");
+
+// 在data声明之前，添加支付方式映射
+const payTypeMap = {
+  1: '支付宝',
+  2: '微信',
+  3: '银行卡'
+};
+
+// 订单状态映射
+const orderStatusMap = {
+  0: '待付款',
+  1: '待发货',
+  2: '待收货',
+  3: '已完成', 
+  4: '已取消',
+  5: '退款中',
+  6: '已退款'
+};
 
 const data = reactive({
   form: {},

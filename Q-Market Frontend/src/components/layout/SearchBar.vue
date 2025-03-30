@@ -1,15 +1,30 @@
 <script setup>
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
+import { searchProducts } from '@/mock/data.js'
 
 const router = useRouter()
 const searchQuery = ref('')
 const isLoading = ref(false)
 
+// 存储搜索结果，用于在路由跳转时传递
+const storeSearchResults = (keyword) => {
+  const results = searchProducts(keyword);
+  sessionStorage.setItem('searchResults', JSON.stringify({
+    keyword: keyword,
+    results: results,
+    timestamp: new Date().getTime()
+  }));
+  return results;
+}
+
 const handleSearch = () => {
   if (!searchQuery.value.trim()) return
   
   isLoading.value = true
+  // 使用模拟数据搜索
+  const results = storeSearchResults(searchQuery.value);
+  
   // 模拟搜索请求延迟
   setTimeout(() => {
     router.push({

@@ -1,19 +1,27 @@
 <script setup>
 import { ref, computed } from 'vue'
 import { useRouter } from 'vue-router'
+import { useUserStore } from '@/stores/user'
+import { useCartStore } from '@/stores/cart'
 import SearchBar from './SearchBar.vue'
 
 const router = useRouter()
+const userStore = useUserStore()
+const cartStore = useCartStore()
 const isMenuOpen = ref(false)
-const isLoggedIn = ref(false) // 这里应该从用户状态管理中获取
 
-// 模拟用户信息
-const userInfo = {
-  name: '用户名',
-  avatar: 'https://cube.elemecdn.com/0/88/03b0d39583f48206768a7534e55bcpng.png'
-}
+// 使用store中的登录状态替代本地变量
+// const isLoggedIn = ref(false) // 删除这行
+const isLoggedIn = computed(() => userStore.isLoggedIn) // 改为计算属性
 
-const cartCount = ref(0) // 这里应该从购物车状态管理中获取
+// 从store获取用户信息
+const userInfo = computed(() => ({
+  name: userStore.username || userStore.userInfo?.nickname || '用户',
+  avatar: userStore.avatar || 'https://cube.elemecdn.com/0/88/03b0d39583f48206768a7534e55bcpng.png'
+}))
+
+// 从cart store获取购物车数量
+const cartCount = computed(() => cartStore.totalItems)
 
 const toggleMenu = () => {
   isMenuOpen.value = !isMenuOpen.value
@@ -29,6 +37,16 @@ const handleRegister = () => {
 
 const goToCart = () => {
   router.push('/cart')
+}
+
+// 添加登出方法
+const handleLogout = () => {
+  userStore.logout()
+  router.push('/')
+}
+
+const goToProfile = () => {
+  router.push('/profile')
 }
 </script>
 
@@ -66,27 +84,33 @@ const goToCart = () => {
           </div>
 
           <!-- 用户信息/登录按钮 -->
-          <div v-if="isLoggedIn" class="user-info">
-            <el-dropdown>
+          <template v-if="isLoggedIn">
+            <el-dropdown trigger="click">
               <div class="user-avatar">
                 <el-avatar :size="32" :src="userInfo.avatar" />
-                <span class="user-name hidden-sm">{{ userInfo.name }}</span>
-                <el-icon><ArrowDown /></el-icon>
               </div>
               <template #dropdown>
                 <el-dropdown-menu>
-                  <el-dropdown-item @click="router.push('/profile')">个人中心</el-dropdown-item>
-                  <el-dropdown-item @click="router.push('/orders')">我的订单</el-dropdown-item>
-                  <el-dropdown-item @click="router.push('/wishlist')">我的收藏</el-dropdown-item>
-                  <el-dropdown-item divided>退出登录</el-dropdown-item>
+                  <el-dropdown-item @click="goToProfile">
+                    <el-icon><User /></el-icon> 个人中心
+                  </el-dropdown-item>
+                  <el-dropdown-item @click="router.push('/orders')">
+                    <el-icon><List /></el-icon> 我的订单
+                  </el-dropdown-item>
+                  <el-dropdown-item @click="router.push('/favorites')">
+                    <el-icon><Star /></el-icon> 我的收藏
+                  </el-dropdown-item>
+                  <el-dropdown-item divided @click="handleLogout">
+                    <el-icon><SwitchButton /></el-icon> 退出登录
+                  </el-dropdown-item>
                 </el-dropdown-menu>
               </template>
             </el-dropdown>
-          </div>
-          <div v-else class="auth-buttons hidden-xs">
-            <el-button type="primary" size="small" @click="handleLogin">登录</el-button>
-            <el-button size="small" @click="handleRegister">注册</el-button>
-          </div>
+          </template>
+          <template v-else>
+            <el-button type="text" @click="handleLogin">登录</el-button>
+            <el-button type="primary" @click="handleRegister">注册</el-button>
+          </template>
 
           <!-- 移动端菜单按钮 -->
           <div class="menu-toggle visible-xs" @click="toggleMenu">
@@ -205,22 +229,8 @@ const goToCart = () => {
     }
   }
   
-  .user-info {
+  .user-avatar {
     cursor: pointer;
-    
-    .user-avatar {
-      display: flex;
-      align-items: center;
-      
-      .user-name {
-        margin: 0 $spacing-sm;
-      }
-    }
-  }
-  
-  .auth-buttons {
-    display: flex;
-    gap: $spacing-sm;
   }
   
   .menu-toggle {

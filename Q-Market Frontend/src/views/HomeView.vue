@@ -232,7 +232,7 @@ const promotions = ref([
   }
 ])
 
-// 热门商品
+// 热门商品 - 确保每个商品使用不同ID
 const featuredProducts = ref([
   {
     id: 1,
@@ -261,77 +261,77 @@ const featuredProducts = ref([
   {
     id: 3,
     name: '智能手表 Series 7',
-    description: '健康监测，运动追踪，智能通知',
-    price: 2599,
+    description: '全天候健康监测，多种运动模式',
+    price: 2499,
     originalPrice: 2999,
     image: 'https://picsum.photos/id/111/300/300',
-    rating: 4.6,
+    rating: 4.9,
     reviewCount: 892,
     category: '电子产品',
-    isNew: false
+    isNew: true
   },
   {
     id: 4,
-    name: '时尚休闲外套',
-    description: '简约设计，舒适面料，多色可选',
-    price: 399,
-    originalPrice: 599,
-    image: 'https://picsum.photos/id/56/300/300',
-    rating: 4.5,
-    reviewCount: 568,
-    category: '服装鞋帽',
+    name: '无线降噪耳机',
+    description: '主动降噪，高清音质，舒适佩戴',
+    price: 1599,
+    originalPrice: 1899,
+    image: 'https://picsum.photos/id/112/300/300',
+    rating: 4.6,
+    reviewCount: 1567,
+    category: '电子产品',
     isNew: false
   }
 ])
 
-// 新品上架
+// 新品上架 - 确保每个商品使用不同ID
 const newArrivals = ref([
   {
     id: 5,
-    name: '无线降噪耳机',
-    description: '主动降噪，高清音质，长效续航',
-    price: 1299,
-    originalPrice: 1499,
-    image: 'https://picsum.photos/id/29/300/300',
-    rating: 4.7,
-    reviewCount: 426,
+    name: '专业相机 DSLR',
+    description: '高清画质，专业摄影，多种场景模式',
+    price: 8999,
+    originalPrice: 10999,
+    image: 'https://picsum.photos/id/120/300/300',
+    rating: 4.9,
+    reviewCount: 468,
     category: '电子产品',
     isNew: true
   },
   {
     id: 6,
-    name: '智能空气净化器',
-    description: '高效过滤，智能控制，静音运行',
-    price: 1599,
-    originalPrice: 1899,
-    image: 'https://picsum.photos/id/177/300/300',
-    rating: 4.6,
-    reviewCount: 358,
-    category: '家居生活',
+    name: '智能扫地机器人',
+    description: '智能规划路线，强劲吸力，远程控制',
+    price: 2999,
+    originalPrice: 3599,
+    image: 'https://picsum.photos/id/118/300/300',
+    rating: 4.7,
+    reviewCount: 253,
+    category: '家用电器',
     isNew: true
   },
   {
     id: 7,
-    name: '专业级咖啡机',
-    description: '意式浓缩，多功能，操作简便',
-    price: 2999,
-    originalPrice: 3599,
-    image: 'https://picsum.photos/id/225/300/300',
+    name: '高端厨师机',
+    description: '多功能料理，强劲马力，大容量',
+    price: 3999,
+    originalPrice: 4699,
+    image: 'https://picsum.photos/id/116/300/300',
     rating: 4.8,
-    reviewCount: 247,
-    category: '家居生活',
+    reviewCount: 187,
+    category: '厨房电器',
     isNew: true
   },
   {
     id: 8,
-    name: '舒适针织毛衣',
-    description: '优质羊毛，保暖透气，经典设计',
-    price: 499,
-    originalPrice: 699,
-    image: 'https://picsum.photos/id/63/300/300',
-    rating: 4.5,
-    reviewCount: 189,
-    category: '服装鞋帽',
+    name: '智能空气净化器',
+    description: '高效过滤，智能检测，静音运行',
+    price: 1999,
+    originalPrice: 2499,
+    image: 'https://picsum.photos/id/117/300/300',
+    rating: 4.6,
+    reviewCount: 342,
+    category: '家用电器',
     isNew: true
   }
 ])

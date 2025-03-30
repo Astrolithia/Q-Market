@@ -6,6 +6,10 @@ const props = defineProps({
   product: {
     type: Object,
     required: true
+  },
+  showActionButtons: {
+    type: Boolean,
+    default: false
   }
 })
 
@@ -18,7 +22,7 @@ const discountPercent = computed(() => {
   return Math.round(100 - (props.product.price / props.product.originalPrice * 100))
 })
 
-const navigateToProduct = () => {
+const goToDetail = () => {
   router.push(`/product/${props.product.id}`)
 }
 
@@ -42,7 +46,7 @@ const addToWishlist = (event) => {
 </script>
 
 <template>
-  <div class="product-card" @click="navigateToProduct">
+  <div class="product-card" @click="goToDetail">
     <div class="product-image">
       <img :src="product.image" :alt="product.name" />
       

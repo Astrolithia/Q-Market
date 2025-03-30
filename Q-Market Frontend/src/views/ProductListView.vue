@@ -1,6 +1,7 @@
 <script setup>
 import { ref, reactive, computed, onMounted, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
+import { products, categories, brands, searchProducts } from '@/mock/data.js'
 import ProductCard from '@/components/product/ProductCard.vue'
 
 const route = useRoute()
@@ -18,27 +19,6 @@ const filters = reactive({
   sort: queryParams.value.sort || 'default'
 })
 
-// 商品分类
-const categories = ref([
-  { id: 1, name: '电子产品' },
-  { id: 2, name: '服装鞋帽' },
-  { id: 3, name: '家居生活' },
-  { id: 4, name: '美妆个护' },
-  { id: 5, name: '食品饮料' },
-  { id: 6, name: '运动户外' },
-  { id: 7, name: '母婴玩具' },
-  { id: 8, name: '图书音像' }
-])
-
-// 商品品牌
-const brands = ref([
-  { id: 1, name: '品牌A' },
-  { id: 2, name: '品牌B' },
-  { id: 3, name: '品牌C' },
-  { id: 4, name: '品牌D' },
-  { id: 5, name: '品牌E' }
-])
-
 // 加载状态
 const loading = ref(false)
 
@@ -49,7 +29,7 @@ const pagination = reactive({
   total: 0
 })
 
-// 模拟商品列表数据
+// 商品列表数据
 const productList = ref([])
 
 // 排序选项
@@ -77,7 +57,7 @@ const activeFilters = computed(() => {
   const result = []
   
   if (filters.category) {
-    const category = categories.value.find(c => c.name === filters.category)
+    const category = categories.find(c => c.name === filters.category)
     if (category) {
       result.push({
         type: 'category',
@@ -88,7 +68,7 @@ const activeFilters = computed(() => {
   }
   
   if (filters.brand) {
-    const brand = brands.value.find(b => b.name === filters.brand)
+    const brand = brands.find(b => b.name === filters.brand)
     if (brand) {
       result.push({
         type: 'brand',
@@ -178,142 +158,138 @@ const handlePageChange = (page) => {
   fetchProducts()
 }
 
+// 加载所有商品
+const loadAllProducts = () => {
+  loading.value = true;
+  // 重置筛选条件
+  filters.category = '';
+  filters.brand = '';
+  filters.minPrice = '';
+  filters.maxPrice = '';
+  filters.sort = 'default';
+  
+  // 加载所有商品数据
+  setTimeout(() => {
+    productList.value = [...products];
+    pagination.total = products.length;
+    loading.value = false;
+  }, 300);
+}
+
 // 获取商品数据
 const fetchProducts = () => {
   loading.value = true
   
-  // 模拟API请求延迟
+  // 使用从mock/data.js导入的数据
   setTimeout(() => {
-    // 生成模拟数据
-    const mockProducts = []
-    const baseCount = 50
-    const pageSize = pagination.pageSize
-    const startIndex = (pagination.current - 1) * pageSize
-    
-    // 生成更多随机产品数据
-    for (let i = 0; i < baseCount; i++) {
-      const id = i + 1
-      const category = categories.value[Math.floor(Math.random() * categories.value.length)].name
-      const brand = brands.value[Math.floor(Math.random() * brands.value.length)].name
-      const price = Math.floor(Math.random() * 9000) + 100
-      const discount = Math.random() > 0.5
-      const originalPrice = discount ? price * (1 + Math.random() * 0.5) : null
-      const rating = (3 + Math.random() * 2).toFixed(1)
-      const reviewCount = Math.floor(Math.random() * 200)
-      const isNew = Math.random() > 0.7
-      
-      mockProducts.push({
-        id,
-        name: `商品${id} ${category}系列`,
-        category,
-        brand,
-        price,
-        originalPrice: originalPrice ? Math.floor(originalPrice) : null,
-        image: `https://picsum.photos/id/${(id % 100) + 100}/300/300`,
-        rating: parseFloat(rating),
-        reviewCount,
-        isNew
-      })
-    }
-    
     // 应用筛选
-    let filtered = [...mockProducts]
+    let filtered = [...products]
     
+    // 按分类筛选
     if (filters.category) {
       filtered = filtered.filter(p => p.category === filters.category)
     }
     
+    // 按品牌筛选
     if (filters.brand) {
       filtered = filtered.filter(p => p.brand === filters.brand)
     }
     
+    // 按价格范围筛选
     if (filters.minPrice) {
-      filtered = filtered.filter(p => p.price >= filters.minPrice)
+      filtered = filtered.filter(p => p.price >= Number(filters.minPrice))
     }
     
     if (filters.maxPrice) {
-      filtered = filtered.filter(p => p.price <= filters.maxPrice)
+      filtered = filtered.filter(p => p.price <= Number(filters.maxPrice))
     }
     
-    if (queryParams.value.q) {
-      const keyword = queryParams.value.q.toLowerCase()
-      filtered = filtered.filter(p => 
-        p.name.toLowerCase().includes(keyword) || 
-        p.category.toLowerCase().includes(keyword)
-      )
-    }
-    
-    // 应用排序
-    switch (filters.sort) {
+    // 排序
+    switch(filters.sort) {
       case 'price-asc':
         filtered.sort((a, b) => a.price - b.price)
         break
       case 'price-desc':
         filtered.sort((a, b) => b.price - a.price)
         break
-      case 'sales':
-        filtered.sort((a, b) => b.reviewCount - a.reviewCount)
-        break
       case 'rating':
         filtered.sort((a, b) => b.rating - a.rating)
         break
+      case 'sales':
+        // 假设有sales字段，如果没有可以按reviewCount排序
+        filtered.sort((a, b) => b.reviewCount - a.reviewCount)
+        break
       case 'new':
-        filtered.sort((a, b) => (b.isNew ? 1 : 0) - (a.isNew ? 1 : 0))
+        filtered.sort((a, b) => Number(b.isNew) - Number(a.isNew))
         break
       default:
-        // 默认排序
+        // 默认排序，可以按id或其他属性排序
         break
     }
     
-    // 更新分页信息
-    pagination.total = filtered.length
+    // 计算总数
+    pagination.total = filtered.length;
     
-    // 获取当前页数据
-    productList.value = filtered.slice(startIndex, startIndex + pageSize)
+    // 处理分页
+    const startIndex = (pagination.current - 1) * pagination.pageSize;
+    const endIndex = startIndex + pagination.pageSize;
+    productList.value = filtered.slice(startIndex, endIndex);
     
     loading.value = false
   }, 500)
+}
+
+// 处理搜索
+const handleSearch = (keyword) => {
+  loading.value = true;
+  
+  // 先尝试从会话存储获取搜索结果
+  const savedSearch = sessionStorage.getItem('searchResults');
+  if (savedSearch) {
+    const { keyword: savedKeyword, results, timestamp } = JSON.parse(savedSearch);
+    
+    // 如果是相同的关键词且搜索时间在5分钟内，直接使用缓存结果
+    if (savedKeyword === keyword && (new Date().getTime() - timestamp < 300000)) {
+      productList.value = results;
+      pagination.total = results.length;
+      loading.value = false;
+      return;
+    }
+  }
+  
+  // 否则重新搜索
+  setTimeout(() => {
+    const results = searchProducts(keyword);
+    pagination.total = results.length;
+    productList.value = results;
+    loading.value = false;
+  }, 500);
 }
 
 // 监听查询参数变化
 watch(
   () => route.query,
   (newQuery) => {
-    filters.category = newQuery.category || ''
-    filters.sort = newQuery.sort || 'default'
-    fetchProducts()
-  }
+    if (newQuery.q) {
+      // 如果是搜索查询
+      handleSearch(newQuery.q);
+    } else if (newQuery.category) {
+      // 如果是分类筛选
+      filters.category = newQuery.category;
+      applyFilters();
+    } else {
+      // 重置为所有产品
+      loadAllProducts();
+    }
+  },
+  { immediate: true }
 )
 
-// 组件挂载时获取数据
+// 组件挂载时，如果没有查询参数，则加载所有商品
 onMounted(() => {
-  // 初始化筛选条件
-  if (queryParams.value.q) {
-    filters.keyword = queryParams.value.q
+  if (!route.query.q && !route.query.category) {
+    loadAllProducts();
   }
-  
-  if (queryParams.value.category) {
-    filters.category = queryParams.value.category
-  }
-  
-  if (queryParams.value.brand) {
-    filters.brand = queryParams.value.brand
-  }
-  
-  if (queryParams.value.minPrice) {
-    filters.minPrice = queryParams.value.minPrice
-  }
-  
-  if (queryParams.value.maxPrice) {
-    filters.maxPrice = queryParams.value.maxPrice
-  }
-  
-  if (queryParams.value.sort) {
-    filters.sort = queryParams.value.sort
-  }
-  
-  // 获取数据
-  fetchProducts()
 })
 </script>
 

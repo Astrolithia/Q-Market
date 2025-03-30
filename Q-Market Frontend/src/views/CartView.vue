@@ -4,14 +4,14 @@
       <h1 class="page-title">购物车</h1>
       
       <div v-if="cartItems.length === 0" class="empty-cart">
-        <el-empty description="您的购物车是空的">
+        <el-empty description="您的购物车还是空的">
           <el-button type="primary" @click="continueShopping">去购物</el-button>
         </el-empty>
       </div>
       
       <div v-else class="cart-container">
-        <!-- 购物车表格 -->
         <div class="cart-table">
+          <!-- 购物车表头 -->
           <div class="cart-header">
             <div class="cart-cell checkbox-cell">
               <el-checkbox v-model="allSelected" />
@@ -23,18 +23,34 @@
             <div class="cart-cell action-cell">操作</div>
           </div>
           
+          <!-- 购物车商品列表 -->
           <div class="cart-body">
-            <div v-for="item in cartItems" :key="item.id" class="cart-row">
+            <div class="cart-row" v-for="item in cartItems" :key="item.id">
               <div class="cart-cell checkbox-cell">
-                <el-checkbox v-model="item.selected" @change="() => toggleSelect(item)" />
+                <el-checkbox 
+                  v-model="item.selected" 
+                  @change="toggleSelect(item.id)"
+                />
               </div>
               
               <div class="cart-cell product-cell">
                 <div class="product-info">
-                  <img :src="item.product.image" :alt="item.product.name" class="product-image" @click="router.push(`/product/${item.product.id}`)" />
+                  <img 
+                    class="product-image" 
+                    :src="item.product.image" 
+                    :alt="item.product.name"
+                    @click="router.push(`/product/${item.product.id}`)"
+                  />
                   <div class="product-details">
-                    <h3 class="product-name" @click="router.push(`/product/${item.product.id}`)">{{ item.product.name }}</h3>
-                    <div class="product-specs">{{ item.product.specs }}</div>
+                    <div 
+                      class="product-name"
+                      @click="router.push(`/product/${item.product.id}`)"
+                    >
+                      {{ item.product.name }}
+                    </div>
+                    <div class="product-specs" v-if="item.product.specs">
+                      {{ item.product.specs }}
+                    </div>
                   </div>
                 </div>
               </div>
@@ -42,32 +58,19 @@
               <div class="cart-cell price-cell">
                 <div class="price">
                   <span class="current-price">¥{{ item.product.price.toFixed(2) }}</span>
-                  <span v-if="item.product.originalPrice" class="original-price">¥{{ item.product.originalPrice.toFixed(2) }}</span>
+                  <span class="original-price" v-if="item.product.originalPrice">
+                    ¥{{ item.product.originalPrice.toFixed(2) }}
+                  </span>
                 </div>
               </div>
               
               <div class="cart-cell quantity-cell">
-                <div class="quantity-control">
-                  <el-button 
-                    size="small" 
-                    :icon="Minus" 
-                    @click="decrementQuantity(item)" 
-                    :disabled="item.quantity <= 1"
-                  />
-                  <el-input-number 
-                    v-model="item.quantity" 
-                    :min="1" 
-                    :max="99" 
-                    controls-position="right"
-                    size="small"
-                    @change="(value) => updateQuantity(item, value)"
-                  />
-                  <el-button 
-                    size="small" 
-                    :icon="Plus" 
-                    @click="incrementQuantity(item)"
-                  />
-                </div>
+                <el-input-number 
+                  v-model="item.quantity" 
+                  :min="1" 
+                  :max="99"
+                  @change="updateQuantity(item.id, item.quantity)"
+                />
               </div>
               
               <div class="cart-cell subtotal-cell">
@@ -100,10 +103,10 @@
                 已选商品 <span class="highlight">{{ selectedItemCount }}</span> 件，共 <span class="highlight">{{ selectedQuantityCount }}</span> 件
               </div>
               <div class="summary-item">
-                商品总价: <span class="price">¥{{ totalPrice.toFixed(2) }}</span>
+                商品总价: <span class="price">¥{{ cartStore.totalPrice.toFixed(2) }}</span>
               </div>
               <div class="summary-item">
-                已节省: <span class="discount">¥{{ totalSaved.toFixed(2) }}</span>
+                已节省: <span class="discount">¥{{ cartStore.savedAmount.toFixed(2) }}</span>
               </div>
             </div>
             
@@ -111,7 +114,7 @@
               <el-button @click="continueShopping">继续购物</el-button>
               <el-button 
                 type="primary" 
-                @click="goToCheckout" 
+                @click="checkout" 
                 :disabled="selectedItemCount === 0"
               >
                 去结算 ({{ selectedItemCount }})
@@ -133,6 +136,129 @@
     </div>
   </div>
 </template>
+
+<script setup>
+import { ref, computed, onMounted } from 'vue'
+import { useRouter } from 'vue-router'
+import { useCartStore } from '@/stores/cart'
+import { ElMessage, ElMessageBox } from 'element-plus'
+import ProductCard from '@/components/product/ProductCard.vue'
+
+const router = useRouter()
+const cartStore = useCartStore()
+
+// 购物车商品列表
+const cartItems = computed(() => cartStore.items)
+
+// 全选状态
+const allSelected = computed({
+  get: () => {
+    return cartItems.value.length > 0 && cartItems.value.every(item => item.selected)
+  },
+  set: (value) => {
+    cartStore.toggleAllSelection(value)
+  }
+})
+
+// 继续购物
+const continueShopping = () => {
+  router.push('/products')
+}
+
+// 选择/取消选择单个商品
+const toggleSelect = (itemId) => {
+  cartStore.toggleItemSelection(itemId)
+}
+
+// 更新商品数量
+const updateQuantity = (itemId, newQuantity) => {
+  cartStore.updateItemQuantity(itemId, newQuantity)
+}
+
+// 移除商品
+const removeItem = (itemId) => {
+  cartStore.removeItem(itemId)
+}
+
+// 清空购物车
+const clearCart = () => {
+  ElMessageBox.confirm('确定要清空购物车吗?', '提示', {
+    confirmButtonText: '确定',
+    cancelButtonText: '取消',
+    type: 'warning'
+  }).then(() => {
+    cartStore.clearCart()
+    ElMessage.success('购物车已清空')
+  }).catch(() => {})
+}
+
+// 结算
+const checkout = () => {
+  if (selectedItemCount.value === 0) {
+    ElMessage.warning('请至少选择一件商品')
+    return
+  }
+  router.push('/checkout')
+}
+
+// 计算已选商品数量
+const selectedItemCount = computed(() => {
+  return cartStore.selectedItems.length
+})
+
+// 计算已选商品总数量
+const selectedQuantityCount = computed(() => {
+  return cartStore.selectedItems.reduce((total, item) => total + item.quantity, 0)
+})
+
+// 推荐商品
+const recommendedProducts = ref([
+  {
+    id: 101,
+    name: '智能降噪耳机',
+    description: '高品质音频体验',
+    price: 899,
+    originalPrice: 1299,
+    image: 'https://picsum.photos/id/367/300/300',
+    rating: 4.8,
+    reviewCount: 256,
+    category: '电子产品'
+  },
+  {
+    id: 102,
+    name: '便携式充电宝',
+    description: '20000mAh大容量',
+    price: 199,
+    originalPrice: 299,
+    image: 'https://picsum.photos/id/365/300/300',
+    rating: 4.6,
+    reviewCount: 1024,
+    category: '电子产品'
+  },
+  {
+    id: 103,
+    name: '无线充电器',
+    description: '快速充电，兼容多设备',
+    price: 129,
+    originalPrice: 199,
+    image: 'https://picsum.photos/id/119/300/300',
+    rating: 4.5,
+    reviewCount: 768,
+    category: '电子产品'
+  },
+  {
+    id: 104,
+    name: '手机保护壳',
+    description: '防摔设计，完美贴合',
+    price: 49,
+    originalPrice: 99,
+    image: 'https://picsum.photos/id/366/300/300',
+    rating: 4.7,
+    reviewCount: 512,
+    category: '电子产品'
+  }
+])
+</script>
 
 <style lang="scss" scoped>
 @import '@/assets/css/variables.scss';
@@ -257,78 +383,57 @@
 }
 
 .quantity-cell {
-  width: 20%;
-  
-  .quantity-control {
-    display: flex;
-    align-items: center;
-    
-    .el-input-number {
-      width: 120px;
-      margin: 0 $spacing-xs;
-    }
-  }
+  width: 15%;
 }
 
 .subtotal-cell {
   width: 15%;
   
   .subtotal {
-    font-size: 18px;
+    font-size: 16px;
     font-weight: 600;
     color: $danger-color;
   }
 }
 
 .action-cell {
-  width: 5%;
+  width: 10%;
   justify-content: center;
 }
 
 .cart-footer {
+  background-color: $bg-white;
+  border-radius: $border-radius;
+  box-shadow: $box-shadow;
+  margin-top: $spacing-md;
+  padding: $spacing-md;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  background-color: $bg-white;
-  padding: $spacing-md $spacing-lg;
-  margin-top: $spacing-md;
-  border-radius: $border-radius;
-  box-shadow: $box-shadow;
-  
-  @media (max-width: $breakpoint-md) {
-    flex-direction: column;
-    gap: $spacing-md;
-  }
 }
 
 .cart-operations {
   display: flex;
   align-items: center;
-  gap: $spacing-md;
+  
+  .el-button {
+    margin-left: $spacing-md;
+  }
 }
 
 .cart-summary {
   display: flex;
   align-items: center;
-  gap: $spacing-xl;
-  
-  @media (max-width: $breakpoint-md) {
-    flex-direction: column;
-    align-items: flex-start;
-    width: 100%;
-  }
   
   .summary-info {
-    text-align: right;
-    
-    @media (max-width: $breakpoint-md) {
-      text-align: left;
-      width: 100%;
-    }
+    margin-right: $spacing-xl;
     
     .summary-item {
       margin-bottom: $spacing-xs;
-      color: $text-light;
+      
+      &:last-child {
+        margin-bottom: 0;
+      }
       
       .highlight {
         color: $primary-color;
@@ -336,9 +441,9 @@
       }
       
       .price {
-        font-size: 20px;
-        font-weight: 600;
         color: $danger-color;
+        font-size: 18px;
+        font-weight: 600;
       }
       
       .discount {
@@ -351,77 +456,17 @@
   .checkout-actions {
     display: flex;
     gap: $spacing-md;
-    
-    @media (max-width: $breakpoint-md) {
-      justify-content: flex-end;
-      width: 100%;
-    }
   }
 }
 
-.recommended-products {
-  .section-title {
-    font-size: 20px;
-    font-weight: 600;
-    margin-bottom: $spacing-lg;
-    color: $text-color;
-  }
+.section {
+  margin-top: $spacing-xl;
 }
 
-@media (max-width: $breakpoint-sm) {
-  .cart-table {
-    font-size: 14px;
-  }
-  
-  .cart-header {
-    display: none;
-  }
-  
-  .cart-row {
-    flex-wrap: wrap;
-    padding: $spacing-md $spacing-sm;
-  }
-  
-  .cart-cell {
-    margin-bottom: $spacing-sm;
-  }
-  
-  .checkbox-cell {
-    width: 10%;
-  }
-  
-  .product-cell {
-    width: 90%;
-    order: 1;
-  }
-  
-  .price-cell {
-    width: 30%;
-    order: 2;
-  }
-  
-  .quantity-cell {
-    width: 40%;
-    order: 3;
-    
-    .quantity-control {
-      justify-content: center;
-      .el-input-number {
-        width: 100px;
-      }
-    }
-  }
-  
-  .subtotal-cell {
-    width: 30%;
-    order: 4;
-    justify-content: flex-end;
-  }
-  
-  .action-cell {
-    width: 100%;
-    order: 5;
-    justify-content: flex-end;
-  }
+.section-title {
+  font-size: 20px;
+  font-weight: 600;
+  margin-bottom: $spacing-lg;
+  color: $text-color;
 }
 </style> 

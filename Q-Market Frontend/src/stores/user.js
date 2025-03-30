@@ -2,10 +2,24 @@ import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 
 export const useUserStore = defineStore('user', () => {
-  // 用户信息
-  const userInfo = ref(null)
-  // 登录状态
-  const token = ref('')
+  // 用户信息 - 修改这里直接设置一个测试用户
+  const userInfo = ref({
+    id: 1001,
+    username: 'testuser',
+    nickname: '测试用户',
+    email: 'test@example.com',
+    phone: '13800138000',
+    avatar: 'https://cube.elemecdn.com/0/88/03b0d39583f48206768a7534e55bcpng.png',
+    gender: '男',
+    birthday: '1990-01-01',
+    roles: ['user'],
+    permissions: ['profile:view', 'order:view', 'order:create'],
+    createTime: '2023-01-01',
+    lastLoginTime: '2023-06-01'
+  })
+  
+  // 登录状态 - 设置为已登录
+  const token = ref('mock-token-for-testing-12345')
   
   // 从本地存储加载用户信息
   const loadUserInfo = () => {
@@ -16,7 +30,7 @@ export const useUserStore = defineStore('user', () => {
       try {
         userInfo.value = JSON.parse(savedUserInfo)
       } catch (e) {
-        userInfo.value = null
+        // 保持默认测试用户
       }
     }
     
@@ -40,8 +54,8 @@ export const useUserStore = defineStore('user', () => {
     }
   }
   
-  // 初始化
-  loadUserInfo()
+  // 初始化时保存默认用户
+  saveUserInfo()
   
   // 登录
   const login = (userData, userToken) => {

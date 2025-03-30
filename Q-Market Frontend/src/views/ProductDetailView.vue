@@ -1,10 +1,14 @@
 <script setup>
 import { ref, reactive, computed, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
+import { useCartStore } from '@/stores/cart'
+import { useFavoritesStore } from '@/stores/favorites'
 import ProductCard from '@/components/product/ProductCard.vue'
 
 const route = useRoute()
 const router = useRouter()
+const cartStore = useCartStore()
+const favoritesStore = useFavoritesStore()
 const productId = computed(() => route.params.id)
 
 // 加载状态
@@ -49,7 +53,7 @@ const relatedProducts = ref([])
 const canAddToCart = computed(() => {
   // 检查所有必选规格是否已选择
   if (product.value) {
-    for (const specType of product.value.specifications) {
+    for (const specType of product.value.specifications || []) {
       if (specType.required && !selectedSpecs[specType.type]) {
         return false
       }
@@ -57,6 +61,11 @@ const canAddToCart = computed(() => {
     return true
   }
   return false
+})
+
+// 计算属性：是否已收藏
+const isFavorite = computed(() => {
+  return product.value && favoritesStore.isFavorite(parseInt(productId.value))
 })
 
 // 增加数量
@@ -88,7 +97,27 @@ const addToCart = () => {
     return
   }
   
-  // 调用购物车store方法
+  // 构建规格字符串
+  let specText = '';
+  for (const [type, value] of Object.entries(selectedSpecs)) {
+    if (value) {
+      specText += (specText ? ' / ' : '') + value;
+    }
+  }
+  
+  // 添加到购物车
+  cartStore.addItem(
+    {
+      id: parseInt(productId.value),
+      name: product.value.name,
+      price: product.value.price,
+      originalPrice: product.value.originalPrice,
+      image: product.value.images?.[0] || product.value.image,
+      specs: specText
+    },
+    quantity.value
+  )
+  
   ElMessage.success('商品已添加到购物车')
 }
 
@@ -100,12 +129,36 @@ const buyNow = () => {
   }
   
   // 添加到购物车并跳转到结算页面
+  addToCart()
   router.push('/checkout')
 }
 
-// 添加到收藏
-const addToWishlist = () => {
-  ElMessage.success('商品已添加到收藏夹')
+// 切换收藏状态
+const toggleFavorite = () => {
+  if (!product.value) return;
+  
+  if (isFavorite.value) {
+    favoritesStore.removeFromFavorites(parseInt(productId.value))
+    ElMessage({
+      message: '已从收藏中移除',
+      type: 'success'
+    })
+  } else {
+    favoritesStore.addToFavorites({
+      id: parseInt(productId.value),
+      name: product.value.name,
+      price: product.value.price,
+      originalPrice: product.value.originalPrice,
+      image: product.value.images?.[0] || product.value.image,
+      category: product.value.category,
+      rating: product.value.rating,
+      reviewCount: product.value.reviewCount
+    })
+    ElMessage({
+      message: '已添加到收藏',
+      type: 'success'
+    })
+  }
 }
 
 // 获取商品数据
@@ -114,24 +167,69 @@ const fetchProductData = () => {
   
   // 模拟API请求
   setTimeout(() => {
-    // 模拟商品数据
+    // 根据ID生成不同的模拟数据
+    const id = parseInt(productId.value)
+    
+    // 用不同的产品数据
+    const productTypes = [
+      {
+        name: '高端智能手机 Pro Max',
+        category: '电子产品',
+        price: 5999,
+        originalPrice: 6999,
+        image: 'https://picsum.photos/id/160/600/600',
+      },
+      {
+        name: '超轻薄笔记本电脑',
+        category: '电子产品',
+        price: 7999,
+        originalPrice: 9999,
+        image: 'https://picsum.photos/id/119/600/600',
+      },
+      {
+        name: '智能手表 Series 7',
+        category: '电子产品',
+        price: 2499,
+        originalPrice: 2999,
+        image: 'https://picsum.photos/id/111/600/600',
+      },
+      {
+        name: '无线降噪耳机',
+        category: '电子产品',
+        price: 1599,
+        originalPrice: 1899,
+        image: 'https://picsum.photos/id/112/600/600',
+      },
+      {
+        name: '专业相机 DSLR',
+        category: '电子产品',
+        price: 8999,
+        originalPrice: 10999,
+        image: 'https://picsum.photos/id/120/600/600',
+      }
+    ]
+    
+    // 根据ID选择产品类型，确保每个ID都有对应数据
+    const productType = productTypes[id % productTypes.length]
+    
+    // 生成商品数据
     product.value = {
-      id: productId.value,
-      name: `高端智能手机 Pro Max ${productId.value}`,
-      price: 5999,
-      originalPrice: 6999,
-      sales: 1024,
-      rating: 4.8,
-      reviewCount: 156,
-      brand: '品牌A',
-      category: '电子产品',
+      id: id,
+      name: `${productType.name} ${id}`,
+      price: productType.price,
+      originalPrice: productType.originalPrice,
+      sales: 800 + id * 50,
+      rating: 4.5 + (id % 5) * 0.1,
+      reviewCount: 100 + id * 10,
+      brand: `品牌${String.fromCharCode(65 + (id % 10))}`,
+      category: productType.category,
       tags: ['新品', '热销', '推荐'],
-      description: `这是一款高端智能手机，配备了最新的处理器和摄像头系统。<br>
+      description: `这是一款高品质${productType.name}，具备多种先进功能。<br>
       <ul>
-        <li>超长续航，支持快充技术</li>
-        <li>高清OLED显示屏，120Hz刷新率</li>
-        <li>专业级摄像系统，支持夜景模式</li>
-        <li>防水防尘，坚固耐用</li>
+        <li>优质性能，长效续航</li>
+        <li>精美设计，时尚外观</li>
+        <li>实用功能，便捷体验</li>
+        <li>耐用可靠，质量保证</li>
       </ul>`,
       specifications: [
         {
@@ -139,21 +237,19 @@ const fetchProductData = () => {
           name: '颜色',
           required: true,
           options: [
-            { name: '午夜黑', image: 'https://picsum.photos/id/1/40/40' },
-            { name: '星空蓝', image: 'https://picsum.photos/id/2/40/40' },
-            { name: '苹果绿', image: 'https://picsum.photos/id/3/40/40' },
-            { name: '粉色', image: 'https://picsum.photos/id/4/40/40' }
+            { name: '经典黑', image: 'https://picsum.photos/id/20/30/30' },
+            { name: '典雅白', image: 'https://picsum.photos/id/21/30/30' },
+            { name: '时尚蓝', image: 'https://picsum.photos/id/22/30/30' }
           ]
         },
         {
           type: 'size',
-          name: '存储容量',
+          name: '规格',
           required: true,
           options: [
-            { name: '128GB' },
-            { name: '256GB' },
-            { name: '512GB' },
-            { name: '1TB' }
+            { name: '标准版', price: 0 },
+            { name: '高级版', price: 500 },
+            { name: '豪华版', price: 1000 }
           ]
         },
         {
@@ -161,107 +257,123 @@ const fetchProductData = () => {
           name: '版本',
           required: false,
           options: [
-            { name: '标准版' },
-            { name: '尊享版' },
-            { name: '限定版' }
+            { name: '普通版', price: 0 },
+            { name: '限量版', price: 800 }
           ]
         }
       ],
       images: [
-        'https://picsum.photos/id/1/500/500',
-        'https://picsum.photos/id/2/500/500',
-        'https://picsum.photos/id/3/500/500',
-        'https://picsum.photos/id/4/500/500',
-        'https://picsum.photos/id/5/500/500'
-      ]
+        productType.image,
+        `https://picsum.photos/id/${(id * 7) % 100}/600/600`,
+        `https://picsum.photos/id/${(id * 11) % 100}/600/600`,
+        `https://picsum.photos/id/${(id * 13) % 100}/600/600`,
+        `https://picsum.photos/id/${(id * 17) % 100}/600/600`
+      ],
+      image: productType.image
     }
     
-    // 设置默认大图
+    // 设置默认显示的大图
     currentImage.value = product.value.images[0]
     
     // 模拟评价数据
     reviews.value = [
       {
         id: 1,
-        user: { name: '用户123', avatar: 'https://picsum.photos/id/100/40/40' },
+        user: {
+          name: `用户${id}***${id * 123}`,
+          avatar: `https://picsum.photos/id/${60 + (id % 10)}/40/40`
+        },
+        specs: '经典黑 / 标准版',
         rating: 5,
-        date: '2023-10-15',
-        content: '非常好用的手机，外观漂亮，系统流畅，拍照效果好，电池续航长。',
-        images: ['https://picsum.photos/id/10/100/100', 'https://picsum.photos/id/11/100/100'],
-        likes: 25,
+        content: `这个${productType.name}非常好用，各方面性能都很出色，使用体验极佳。包装很精美，物流速度也很快。`,
+        images: [
+          `https://picsum.photos/id/${110 + id}/100/100`,
+          `https://picsum.photos/id/${120 + id}/100/100`
+        ],
+        date: '2023-05-15',
+        likes: 42,
         replies: [
-          { user: '商家', content: '感谢您的支持，祝您使用愉快！', date: '2023-10-16' }
+          {
+            content: '感谢您的评价，我们会继续努力提供更好的产品和服务！',
+            date: '2023-05-16'
+          }
         ]
       },
       {
         id: 2,
-        user: { name: '用户456', avatar: 'https://picsum.photos/id/101/40/40' },
+        user: {
+          name: `购物达人${id * 2}`,
+          avatar: `https://picsum.photos/id/${70 + (id % 10)}/40/40`
+        },
+        specs: '时尚蓝 / 高级版',
         rating: 4,
-        date: '2023-10-10',
-        content: '整体不错，但续航稍差，希望后续系统优化能改善。',
+        content: `总体不错，就是价格稍贵，其他都挺好的。`,
         images: [],
-        likes: 10,
-        replies: []
-      },
-      {
-        id: 3,
-        user: { name: '用户789', avatar: 'https://picsum.photos/id/102/40/40' },
-        rating: 5,
-        date: '2023-10-05',
-        content: '拍照效果杠杠的，夜景模式很强大，非常推荐摄影爱好者入手。',
-        images: ['https://picsum.photos/id/12/100/100'],
-        likes: 18,
+        date: '2023-05-10',
+        likes: 15,
         replies: []
       }
     ]
     
-    // 模拟相关商品
+    // 模拟相关商品数据
     relatedProducts.value = [
       {
-        id: 101,
-        name: '智能手表 Series 5',
-        price: 2499,
-        originalPrice: 2999,
-        image: 'https://picsum.photos/id/111/300/300',
-        category: '电子产品',
-        rating: 4.7,
-        reviewCount: 89,
-        isNew: true
-      },
-      {
-        id: 102,
-        name: '无线降噪耳机',
-        price: 1599,
-        originalPrice: 1899,
-        image: 'https://picsum.photos/id/112/300/300',
-        category: '电子产品',
-        rating: 4.6,
-        reviewCount: 124
-      },
-      {
-        id: 103,
-        name: '快充移动电源',
+        id: id * 100 + 1,
+        name: `配件A - ${productType.name}专用`,
+        description: '优质配件，完美搭配',
         price: 299,
         originalPrice: 399,
-        image: 'https://picsum.photos/id/113/300/300',
-        category: '电子产品',
-        rating: 4.8,
-        reviewCount: 156
+        image: `https://picsum.photos/id/${id * 2 + 100}/300/300`,
+        rating: 4.7,
+        reviewCount: 324,
+        category: productType.category
       },
       {
-        id: 104,
-        name: '蓝牙音箱',
-        price: 599,
-        originalPrice: 699,
-        image: 'https://picsum.photos/id/114/300/300',
-        category: '电子产品',
+        id: id * 100 + 2,
+        name: `配件B - ${productType.name}套装`,
+        description: '耐用设计，时尚美观',
+        price: 199,
+        originalPrice: 299,
+        image: `https://picsum.photos/id/${id * 3 + 100}/300/300`,
+        rating: 4.6,
+        reviewCount: 218,
+        category: productType.category
+      },
+      {
+        id: id * 100 + 3,
+        name: `配件C - ${productType.name}增强版`,
+        description: '增强性能，提升体验',
+        price: 399,
+        originalPrice: 499,
+        image: `https://picsum.photos/id/${id * 4 + 100}/300/300`,
+        rating: 4.9,
+        reviewCount: 156,
+        category: productType.category
+      },
+      {
+        id: id * 100 + 4,
+        name: `配件D - ${productType.name}保护套`,
+        description: '全面保护，防摔耐用',
+        price: 99,
+        originalPrice: 149,
+        image: `https://picsum.photos/id/${id * 5 + 100}/300/300`,
         rating: 4.5,
-        reviewCount: 78
+        reviewCount: 432,
+        category: productType.category
       }
     ]
     
+    // 设置默认选中的第一个规格
+    if (product.value.specifications) {
+      for (const spec of product.value.specifications) {
+        if (spec.options && spec.options.length > 0) {
+          selectedSpecs[spec.type] = spec.options[0].name
+        }
+      }
+    }
+    
     loading.value = false
-  }, 800)
+  }, 600)
 }
 
 onMounted(() => {
@@ -418,9 +530,12 @@ onMounted(() => {
                 立即购买
               </el-button>
               
-              <el-button plain @click="addToWishlist">
+              <el-button 
+                :type="isFavorite ? 'danger' : 'default'" 
+                @click="toggleFavorite"
+              >
                 <el-icon><Star /></el-icon>
-                收藏
+                {{ isFavorite ? '已收藏' : '收藏' }}
               </el-button>
             </div>
             

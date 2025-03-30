@@ -52,6 +52,18 @@ const router = createRouter({
       component: () => import('../views/AboutView.vue'),
       meta: { title: '关于我们 - Q-Market' }
     },
+    {
+      path: '/favorites',
+      name: 'favorites',
+      component: () => import('../views/FavoritesView.vue'),
+      meta: { title: '我的收藏 - Q-Market', requiresAuth: true }
+    },
+    {
+      path: '/orders',
+      name: 'orders',
+      component: () => import('../views/OrdersView.vue'),
+      meta: { title: '我的订单 - Q-Market', requiresAuth: true }
+    },
     // 404页面，放在最后
     {
       path: '/:pathMatch(.*)*',
@@ -81,11 +93,12 @@ router.beforeEach((to, from, next) => {
   // 权限检查
   if (to.meta.requiresAuth) {
     // 这里应该检查用户是否已登录，如果没有登录则跳转到登录页面
-    // 示例：
-    // const isLoggedIn = store.state.user.isLoggedIn
-    // if (!isLoggedIn) {
-    //   next({ name: 'login', query: { redirect: to.fullPath } })
-    //   return
+    // 但由于我们已经在user.js中设置了默认登录状态，所以可以直接放行
+    // 这里也可以使用Pinia store检查登录状态
+    // const userStore = useUserStore();
+    // if (!userStore.isLoggedIn) {
+    //   next({ name: 'login', query: { redirect: to.fullPath } });
+    //   return;
     // }
   }
   
