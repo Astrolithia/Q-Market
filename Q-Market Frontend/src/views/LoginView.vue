@@ -195,7 +195,7 @@ const thirdPartyLogin = (platform) => {
 
 // 去注册页面
 const goToRegister = () => {
-  router.push('/register')
+  activeTab.value = 'register'
 }
 </script>
 
@@ -363,6 +363,11 @@ const goToRegister = () => {
             </el-form>
           </el-tab-pane>
         </el-tabs>
+
+        <!-- 在登录页面底部添加注册提示 -->
+        <div class="register-prompt" v-if="activeTab === 'login'">
+          <p>还没有账号? <el-button type="text" @click="activeTab = 'register'">立即注册</el-button></p>
+        </div>
       </div>
     </div>
   </div>
@@ -468,5 +473,15 @@ const goToRegister = () => {
 .forgot-desc {
   color: $text-light;
   margin-bottom: $spacing-lg;
+}
+
+.register-prompt {
+  text-align: center;
+  margin-top: $spacing-md;
+  color: $text-light;
+  
+  p {
+    font-size: 14px;
+  }
 }
 </style> 
